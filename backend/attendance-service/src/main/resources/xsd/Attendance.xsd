@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:tns="http://college.com/attendance"
+           targetNamespace="http://college.com/attendance"
+           elementFormDefault="qualified">
+
+    <xs:group name="attendanceFieldsGroup">
+        <xs:sequence>
+            <xs:element name="attendanceCode" type="xs:string"/>
+            <xs:element name="studentId" type="xs:long"/>
+            <xs:element name="courseId" type="xs:long"/>
+            <xs:element name="attendanceDate" type="xs:date"/>
+            <xs:element name="status" type="xs:string"/>
+            <xs:element name="semester" type="xs:int" minOccurs="0"/>
+            <xs:element name="academicYear" type="xs:string" minOccurs="0"/>
+            <xs:element name="attendanceType" type="xs:string" minOccurs="0"/>
+            <xs:element name="remarks" type="xs:string" minOccurs="0"/>
+        </xs:sequence>
+    </xs:group>
+
+    <xs:element name="createAttendanceRequest">
+        <xs:complexType>
+            <xs:group ref="tns:attendanceFieldsGroup"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="createAttendanceResponse">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="attendance" type="tns:attendance"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="getAttendanceRequest">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="attendanceId" type="xs:long"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="getAttendanceResponse">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="attendance" type="tns:attendance"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="getAllAttendanceRequest">
+        <xs:complexType>
+            <xs:sequence/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="getAllAttendanceResponse">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="attendance" type="tns:attendance" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="updateAttendanceRequest">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="attendanceId" type="xs:long"/>
+                <xs:group ref="tns:attendanceFieldsGroup"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="updateAttendanceResponse">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="attendance" type="tns:attendance"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="deleteAttendanceRequest">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="attendanceId" type="xs:long"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="deleteAttendanceResponse">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="success" type="xs:boolean"/>
+                <xs:element name="message" type="xs:string"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:complexType name="attendance">
+        <xs:sequence>
+            <xs:element name="id" type="xs:long"/>
+            <xs:group ref="tns:attendanceFieldsGroup"/>
+        </xs:sequence>
+    </xs:complexType>
+
+</xs:schema>

@@ -1,0 +1,12 @@
+.git
+.github
+.idea
+**/.idea
+*.iml
+**/*.iml
+target
+**/target
+.env
+**/.env
+node_modules
+*.log

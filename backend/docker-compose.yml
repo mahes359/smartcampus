@@ -1,0 +1,360 @@
+version: '3.8'
+
+services:
+  # =====================================================
+  # DATABASE (Database-per-service pattern via PostgreSQL)
+  # =====================================================
+  postgres-db:
+    image: postgres:16-alpine
+    container_name: smartcampus-postgres
+    environment:
+      POSTGRES_USER: ${DB_USERNAME:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./docker/init-databases.sql:/docker-entrypoint-initdb.d/init-databases.sql
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - smartcampus-network
+
+  # =====================================================
+  # SERVICE DISCOVERY & REGISTRY
+  # =====================================================
+  eureka-server:
+    build:
+      context: ./eureka-server
+    container_name: eureka-server
+    ports:
+      - "8761:8761"
+    environment:
+      - PORT=8761
+    networks:
+      - smartcampus-network
+
+  # =====================================================
+  # API GATEWAY
+  # =====================================================
+  api-gateway:
+    build:
+      context: ./api-gateway
+    container_name: api-gateway
+    ports:
+      - "8080:8080"
+    environment:
+      - PORT=8080
+      - EUREKA_URL=http://eureka-server:8761/eureka/
+    depends_on:
+      - eureka-server
+    networks:
+      - smartcampus-network
+
+  # =====================================================
+  # CORE SERVICES
+  # =====================================================
+  auth-service:
+    build:
+      context: ./auth-service
+    ports:
+      - "8090:8090"
+    environment:
+      - PORT=8090
+      - EUREKA_URL=http://eureka-server:8761/eureka/
+      - POSTGRES_HOST=postgres-db
+    depends_on:
+      - eureka-server
+      - postgres-db
+    networks:
+      - smartcampus-network
+
+  college-service:
+    build:
+      context: ./college-service
+    ports:
+      - "8091:8091"
+    environment:
+      - PORT=8091
+      - EUREKA_URL=http://eureka-server:8761/eureka/
+      - POSTGRES_HOST=postgres-db
+    depends_on:
+      - eureka-server
+      - postgres-db
+    networks:
+      - smartcampus-network
+
+  student-service:
+    build:
+      context: ./student-service
+    ports:
+      - "8092:8092"
+    environment:
+      - PORT=8092
+      - EUREKA_URL=http://eureka-server:8761/eureka/
+      - DB_HOST=postgres-db
+    depends_on:
+      - eureka-server
+      - postgres-db
+    networks:
+      - smartcampus-network
+
+  faculty-service:
+    build:
+      context: ./faculty-service
+    ports:
+      - "8093:8093"
+    environment:
+      - PORT=8093
+      - EUREKA_URL=http://eureka-server:8761/eureka/
+      - DB_HOST=postgres-db
+    depends_on:
+      - eureka-server
+      - postgres-db
+    networks:
+      - smartcampus-network
+
+  course-service:
+    build:
+      context: ./course-service
+    ports:
+      - "8094:8094"
+    environment:
+      - PORT=8094
+      - EUREKA_URL=http://eureka-server:8761/eureka/
+      - POSTGRES_HOST=postgres-db
+    depends_on:
+      - eureka-server
+      - postgres-db
+    networks:
+      - smartcampus-network
+
+  enrollment-service:
+    build:
+      context: ./enrollment-service
+    ports:
+      - "8095:8095"
+    environment:
+      - PORT=8095
+      - EUREKA_URL=http://eureka-server:8761/eureka/
+      - POSTGRES_HOST=postgres-db
+    depends_on:
+      - eureka-server
+      - postgres-db
+    networks:
+      - smartcampus-network
+
+  attendance-service:
+    build:
+      context: ./attendance-service
+    ports:
+      - "8096:8096"
+    environment:
+      - PORT=8096
+      - EUREKA_URL=http://eureka-server:8761/eureka/
+      - POSTGRES_HOST=postgres-db
+    depends_on:
+      - eureka-server
+      - postgres-db
+    networks:
+      - smartcampus-network
+
+  exam-service:
+    build:
+      context: ./exam-service
+    ports:
+      - "8097:8097"
+    environment:
+      - PORT=8097
+      - EUREKA_URL=http://eureka-server:8761/eureka/
+      - POSTGRES_HOST=postgres-db
+    depends_on:
+      - eureka-server
+      - postgres-db
+    networks:
+      - smartcampus-network
+
+  timetable-service:
+    build:
+      context: ./timetable-service
+    ports:
+      - "8098:8098"
+    environment:
+      - PORT=8098
+      - EUREKA_URL=http://eureka-server:8761/eureka/
+      - POSTGRES_HOST=postgres-db
+    depends_on:
+      - eureka-server
+      - postgres-db
+    networks:
+      - smartcampus-network
+
+  fee-service:
+    build:
+      context: ./fee-service
+    ports:
+      - "8099:8099"
+    environment:
+      - PORT=8099
+      - EUREKA_URL=http://eureka-server:8761/eureka/
+      - POSTGRES_HOST=postgres-db
+    depends_on:
+      - eureka-server
+      - postgres-db
+    networks:
+      - smartcampus-network
+
+  library-service:
+    build:
+      context: ./library-service
+    ports:
+      - "8100:8100"
+    environment:
+      - PORT=8100
+      - EUREKA_URL=http://eureka-server:8761/eureka/
+      - POSTGRES_HOST=postgres-db
+    depends_on:
+      - eureka-server
+      - postgres-db
+    networks:
+      - smartcampus-network
+
+  hostel-service:
+    build:
+      context: ./hostel-service
+    ports:
+      - "8101:8101"
+    environment:
+      - PORT=8101
+      - EUREKA_URL=http://eureka-server:8761/eureka/
+      - POSTGRES_HOST=postgres-db
+    depends_on:
+      - eureka-server
+      - postgres-db
+    networks:
+      - smartcampus-network
+
+  transport-service:
+    build:
+      context: ./transport-service
+    ports:
+      - "8102:8102"
+    environment:
+      - PORT=8102
+      - EUREKA_URL=http://eureka-server:8761/eureka/
+      - POSTGRES_HOST=postgres-db
+    depends_on:
+      - eureka-server
+      - postgres-db
+    networks:
+      - smartcampus-network
+
+  leave-service:
+    build:
+      context: ./leave-service
+    ports:
+      - "8103:8103"
+    environment:
+      - PORT=8103
+      - EUREKA_URL=http://eureka-server:8761/eureka/
+      - POSTGRES_HOST=postgres-db
+    depends_on:
+      - eureka-server
+      - postgres-db
+    networks:
+      - smartcampus-network
+
+  placement-service:
+    build:
+      context: ./placement-service
+    ports:
+      - "8104:8104"
+    environment:
+      - PORT=8104
+      - EUREKA_URL=http://eureka-server:8761/eureka/
+      - POSTGRES_HOST=postgres-db
+    depends_on:
+      - eureka-server
+      - postgres-db
+    networks:
+      - smartcampus-network
+
+  event-service:
+    build:
+      context: ./event-service
+    ports:
+      - "8105:8105"
+    environment:
+      - PORT=8105
+      - EUREKA_URL=http://eureka-server:8761/eureka/
+      - POSTGRES_HOST=postgres-db
+    depends_on:
+      - eureka-server
+      - postgres-db
+    networks:
+      - smartcampus-network
+
+  notification-service:
+    build:
+      context: ./notification-service
+    ports:
+      - "8106:8106"
+    environment:
+      - PORT=8106
+      - EUREKA_URL=http://eureka-server:8761/eureka/
+      - POSTGRES_HOST=postgres-db
+    depends_on:
+      - eureka-server
+      - postgres-db
+    networks:
+      - smartcampus-network
+
+  document-service:
+    build:
+      context: ./document-service
+    ports:
+      - "8107:8107"
+    environment:
+      - PORT=8107
+      - EUREKA_URL=http://eureka-server:8761/eureka/
+      - POSTGRES_HOST=postgres-db
+    depends_on:
+      - eureka-server
+      - postgres-db
+    networks:
+      - smartcampus-network
+
+  helpdesk-service:
+    build:
+      context: ./helpdesk-service
+    ports:
+      - "8108:8108"
+    environment:
+      - PORT=8108
+      - EUREKA_URL=http://eureka-server:8761/eureka/
+      - POSTGRES_HOST=postgres-db
+    depends_on:
+      - eureka-server
+      - postgres-db
+    networks:
+      - smartcampus-network
+
+  report-service:
+    build:
+      context: ./report-service
+    ports:
+      - "8109:8109"
+    environment:
+      - PORT=8109
+      - EUREKA_URL=http://eureka-server:8761/eureka/
+      - POSTGRES_HOST=postgres-db
+    depends_on:
+      - eureka-server
+      - postgres-db
+    networks:
+      - smartcampus-network
+
+volumes:
+  postgres_data:
+
+networks:
+  smartcampus-network:
+    driver: bridge

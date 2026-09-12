@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bindings xmlns="https://jakarta.ee/xml/ns/jaxb"
+          xmlns:xs="http://www.w3.org/2001/XMLSchema"
+          xmlns:xjc="http://java.sun.com/xml/ns/jaxb/xjc"
+          version="3.0">
+    <globalBindings>
+        <xjc:javaType name="java.time.LocalDate"
+                      xmlType="xs:date"
+                      adapter="com.smartcampus.exam.config.LocalDateAdapter" />
+    </globalBindings>
+    <bindings schemaLocation="Exam.xsd" node="/xs:schema">
+        <schemaBindings>
+            <package name="com.smartcampus.exam.soap"/>
+        </schemaBindings>
+    </bindings>
+</bindings>

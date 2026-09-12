@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:tns="http://college.com/enrollment"
+           targetNamespace="http://college.com/enrollment"
+           elementFormDefault="qualified">
+
+    <xs:group name="enrollmentFieldsGroup">
+        <xs:sequence>
+            <xs:element name="enrollmentCode" type="xs:string"/>
+            <xs:element name="studentId" type="xs:long"/>
+            <xs:element name="courseId" type="xs:long"/>
+            <xs:element name="semester" type="xs:int"/>
+            <xs:element name="status" type="xs:string"/>
+            <xs:element name="enrollmentDate" type="xs:date" minOccurs="0"/>
+            <xs:element name="academicYear" type="xs:string" minOccurs="0"/>
+            <xs:element name="enrollmentType" type="xs:string" minOccurs="0"/>
+        </xs:sequence>
+    </xs:group>
+
+    <xs:element name="createEnrollmentRequest">
+        <xs:complexType>
+            <xs:group ref="tns:enrollmentFieldsGroup"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="createEnrollmentResponse">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="enrollment" type="tns:enrollment"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="getEnrollmentRequest">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="enrollmentId" type="xs:long"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="getEnrollmentResponse">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="enrollment" type="tns:enrollment"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="getAllEnrollmentsRequest">
+        <xs:complexType>
+            <xs:sequence/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="getAllEnrollmentsResponse">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="enrollments" type="tns:enrollment" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="updateEnrollmentRequest">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="enrollmentId" type="xs:long"/>
+                <xs:group ref="tns:enrollmentFieldsGroup"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="updateEnrollmentResponse">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="enrollment" type="tns:enrollment"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="deleteEnrollmentRequest">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="enrollmentId" type="xs:long"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="deleteEnrollmentResponse">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="success" type="xs:boolean"/>
+                <xs:element name="message" type="xs:string"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:complexType name="enrollment">
+        <xs:sequence>
+            <xs:element name="id" type="xs:long"/>
+            <xs:group ref="tns:enrollmentFieldsGroup"/>
+        </xs:sequence>
+    </xs:complexType>
+
+</xs:schema>

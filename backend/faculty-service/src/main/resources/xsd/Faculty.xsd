@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:tns="http://college.com/faculty"
+           targetNamespace="http://college.com/faculty"
+           elementFormDefault="qualified">
+
+    <xs:group name="facultyFieldsGroup">
+        <xs:sequence>
+            <xs:element name="employeeNumber" type="xs:string"/>
+            <xs:element name="firstName" type="xs:string"/>
+            <xs:element name="lastName" type="xs:string"/>
+            <xs:element name="email" type="xs:string"/>
+            <xs:element name="phone" type="xs:string" minOccurs="0"/>
+            <xs:element name="department" type="xs:string"/>
+            <xs:element name="designation" type="xs:string"/>
+            <xs:element name="qualification" type="xs:string" minOccurs="0"/>
+            <xs:element name="specialization" type="xs:string" minOccurs="0"/>
+            <xs:element name="joiningDate" type="xs:date" minOccurs="0"/>
+            <xs:element name="facultyStatus" type="xs:string" minOccurs="0"/>
+            <xs:element name="officeRoom" type="xs:string" minOccurs="0"/>
+            <xs:element name="facultyRole" type="xs:string" minOccurs="0"/>
+        </xs:sequence>
+    </xs:group>
+
+    <xs:element name="createFacultyRequest">
+        <xs:complexType>
+            <xs:group ref="tns:facultyFieldsGroup"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="createFacultyResponse">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="faculty" type="tns:faculty"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="getFacultyRequest">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="facultyId" type="xs:string"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="getFacultyResponse">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="faculty" type="tns:faculty"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="getAllFacultyRequest">
+        <xs:complexType>
+            <xs:sequence/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="getAllFacultyResponse">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="faculty" type="tns:faculty" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="updateFacultyRequest">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="facultyId" type="xs:string"/>
+                <xs:group ref="tns:facultyFieldsGroup"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="updateFacultyResponse">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="faculty" type="tns:faculty"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="deleteFacultyRequest">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="facultyId" type="xs:string"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="deleteFacultyResponse">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="success" type="xs:boolean"/>
+                <xs:element name="message" type="xs:string"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:complexType name="faculty">
+        <xs:sequence>
+            <xs:element name="id" type="xs:string"/>
+            <xs:group ref="tns:facultyFieldsGroup"/>
+        </xs:sequence>
+    </xs:complexType>
+
+</xs:schema>

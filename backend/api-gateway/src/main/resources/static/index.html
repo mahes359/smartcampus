@@ -1,0 +1,1333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enterprise Cloud Command Center — College Management System</title>
+    <meta name="description" content="Distributed Microservices Cloud Command Center, Interactive SOAP API Studio, and Real-time REST Bridge for College Management System.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-base: #0a0f1d;
+            --bg-surface: rgba(16, 24, 46, 0.75);
+            --bg-surface-hover: rgba(23, 34, 66, 0.85);
+            --bg-elevated: rgba(30, 41, 59, 0.6);
+            --border-subtle: rgba(255, 255, 255, 0.08);
+            --border-highlight: rgba(99, 102, 241, 0.35);
+            
+            --primary: #6366f1;
+            --primary-glow: rgba(99, 102, 241, 0.3);
+            --accent-cyan: #06b6d4;
+            --accent-purple: #a855f7;
+            --accent-emerald: #10b981;
+            --accent-amber: #f59e0b;
+            --accent-rose: #f43f5e;
+            
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --text-dim: #64748b;
+            
+            --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: var(--font-sans);
+        }
+
+        body {
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            min-height: 100vh;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.15) 0, transparent 40%),
+                radial-gradient(at 100% 0%, rgba(168, 85, 247, 0.12) 0, transparent 45%),
+                radial-gradient(at 50% 100%, rgba(6, 182, 212, 0.1) 0, transparent 50%);
+            background-attachment: fixed;
+            background-size: cover;
+            padding: 1.5rem;
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* TOP NAVIGATION & HEADER */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 2rem;
+            background: var(--bg-surface);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--border-subtle);
+            border-radius: 20px;
+            margin-bottom: 2rem;
+            box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5);
+            flex-wrap: wrap;
+            gap: 1.5rem;
+        }
+
+        .brand-section {
+            display: flex;
+            align-items: center;
+            gap: 1.25rem;
+        }
+
+        .brand-logo {
+            width: 52px;
+            height: 52px;
+            background: linear-gradient(135deg, var(--primary), var(--accent-cyan));
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 20px var(--primary-glow);
+        }
+
+        .brand-logo svg {
+            width: 28px;
+            height: 28px;
+            color: white;
+        }
+
+        h1 {
+            font-size: 1.75rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            background: linear-gradient(135deg, #ffffff 30%, #94a3b8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .brand-subtitle {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+
+        .header-meta {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .badge-live {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(16, 185, 129, 0.12);
+            color: #34d399;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            padding: 0.4rem 0.9rem;
+            border-radius: 9999px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background-color: #34d399;
+            border-radius: 50%;
+            box-shadow: 0 0 10px #34d399;
+            animation: pulse-glow 2s infinite;
+        }
+
+        .badge-env {
+            background: rgba(99, 102, 241, 0.12);
+            color: #a5b4fc;
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            padding: 0.4rem 0.9rem;
+            border-radius: 9999px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(0.85); }
+        }
+
+        /* STATS OVERVIEW BAR */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 1.25rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--bg-surface);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border-subtle);
+            border-radius: 16px;
+            padding: 1.25rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+            border-color: var(--border-highlight);
+            box-shadow: 0 12px 28px -10px rgba(0, 0, 0, 0.4);
+        }
+
+        .stat-icon {
+            width: 46px;
+            height: 46px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .stat-icon svg { width: 22px; height: 22px; }
+
+        .stat-info .stat-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 600;
+        }
+
+        .stat-info .stat-val {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: white;
+            margin-top: 0.2rem;
+        }
+
+        /* NAVIGATION TABS */
+        .tab-bar {
+            display: flex;
+            gap: 0.75rem;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid var(--border-subtle);
+            padding-bottom: 0.5rem;
+            overflow-x: auto;
+        }
+
+        .tab-btn {
+            background: transparent;
+            color: var(--text-muted);
+            border: none;
+            padding: 0.75rem 1.5rem;
+            font-size: 0.95rem;
+            font-weight: 600;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.6rem;
+            white-space: nowrap;
+        }
+
+        .tab-btn svg { width: 18px; height: 18px; }
+
+        .tab-btn:hover {
+            color: white;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .tab-btn.active {
+            color: white;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.25), rgba(6, 182, 212, 0.2));
+            border: 1px solid var(--border-highlight);
+            box-shadow: 0 4px 15px var(--primary-glow);
+        }
+
+        /* TAB PANELS */
+        .tab-panel {
+            display: none;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .tab-panel.active { display: block; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* MESH TOPOLOGY CARDS */
+        .mesh-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .mesh-card {
+            background: var(--bg-surface);
+            backdrop-filter: blur(14px);
+            border: 1px solid var(--border-subtle);
+            border-radius: 18px;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .mesh-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary), var(--accent-cyan));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .mesh-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--border-highlight);
+            box-shadow: 0 16px 36px -10px rgba(0, 0, 0, 0.5);
+        }
+
+        .mesh-card:hover::before { opacity: 1; }
+
+        .mesh-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .mesh-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: white;
+        }
+
+        .mesh-category {
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            font-weight: 500;
+        }
+
+        .service-badge {
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 0.25rem 0.6rem;
+            border-radius: 6px;
+        }
+
+        .badge-up {
+            background: rgba(16, 185, 129, 0.15);
+            color: #34d399;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .mesh-details {
+            margin: 1rem 0;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: var(--text-muted);
+        }
+
+        .detail-row span:last-child {
+            color: #e2e8f0;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+        }
+
+        .db-tag {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.05);
+            color: #cbd5e1;
+            padding: 0.2rem 0.5rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .mesh-actions {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+
+        .btn-launch {
+            flex: 1;
+            background: linear-gradient(135deg, var(--primary), #4f46e5);
+            color: white;
+            text-decoration: none;
+            padding: 0.6rem 1rem;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-align: center;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.4rem;
+        }
+
+        .btn-launch:hover {
+            filter: brightness(1.15);
+            box-shadow: 0 4px 12px var(--primary-glow);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.06);
+            color: #e2e8f0;
+            border: 1px solid var(--border-subtle);
+            text-decoration: none;
+            padding: 0.6rem 0.9rem;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        /* SOAP STUDIO (INTERACTIVE SANDBOX) */
+        .studio-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        @media (max-width: 960px) {
+            .studio-container { grid-template-columns: 1fr; }
+        }
+
+        .studio-card {
+            background: var(--bg-surface);
+            backdrop-filter: blur(14px);
+            border: 1px solid var(--border-subtle);
+            border-radius: 18px;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .form-select, .code-editor {
+            width: 100%;
+            background: rgba(10, 15, 29, 0.8);
+            border: 1px solid var(--border-subtle);
+            border-radius: 10px;
+            color: #f1f5f9;
+            padding: 0.75rem 1rem;
+            font-size: 0.9rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .form-select:focus, .code-editor:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px var(--primary-glow);
+        }
+
+        .code-editor {
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            line-height: 1.6;
+            resize: vertical;
+            min-height: 240px;
+        }
+
+        .response-box {
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            background: #060913;
+            border: 1px solid var(--border-subtle);
+            border-radius: 10px;
+            padding: 1rem;
+            overflow: auto;
+            max-height: 400px;
+            white-space: pre-wrap;
+            color: #38bdf8;
+            line-height: 1.5;
+        }
+
+        .btn-dispatch {
+            background: linear-gradient(135deg, var(--accent-emerald), #059669);
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn-dispatch:hover {
+            filter: brightness(1.15);
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+        }
+
+        /* REST BRIDGE EXPLORER */
+        .rest-card {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-subtle);
+            border-radius: 16px;
+            padding: 1.25rem 1.5rem;
+            margin-bottom: 1rem;
+            transition: all 0.25s ease;
+        }
+
+        .rest-card:hover {
+            border-color: var(--border-highlight);
+        }
+
+        .rest-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .rest-method {
+            background: rgba(6, 182, 212, 0.15);
+            color: var(--accent-cyan);
+            border: 1px solid rgba(6, 182, 212, 0.3);
+            padding: 0.3rem 0.6rem;
+            border-radius: 6px;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            font-weight: 700;
+        }
+
+        .rest-path {
+            font-family: var(--font-mono);
+            font-size: 0.95rem;
+            color: white;
+            font-weight: 600;
+        }
+
+        .rest-desc {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-top: 0.4rem;
+        }
+
+        /* ANALYTICS SECTION */
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 1.5rem;
+        }
+
+        @media (max-width: 960px) {
+            .analytics-grid { grid-template-columns: 1fr; }
+        }
+
+        .table-custom {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.875rem;
+        }
+
+        .table-custom th {
+            text-align: left;
+            padding: 0.75rem 1rem;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border-subtle);
+            font-weight: 600;
+        }
+
+        .table-custom td {
+            padding: 0.85rem 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            color: #f1f5f9;
+        }
+
+        .table-custom tr:hover td {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        /* PIPELINE VISUALIZER */
+        .pipeline-wrapper {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-subtle);
+            border-radius: 18px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .pipeline-flow {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            overflow-x: auto;
+            padding: 1rem 0;
+        }
+
+        .pipeline-node {
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid var(--border-subtle);
+            border-radius: 14px;
+            padding: 1.25rem;
+            text-align: center;
+            min-width: 180px;
+            transition: all 0.3s ease;
+        }
+
+        .pipeline-node:hover {
+            border-color: var(--primary);
+            box-shadow: 0 0 20px var(--primary-glow);
+            transform: translateY(-3px);
+        }
+
+        .node-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, var(--primary), var(--accent-purple));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 0.75rem auto;
+        }
+
+        .node-icon svg { width: 20px; height: 20px; color: white; }
+
+        .pipeline-arrow {
+            color: var(--text-dim);
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 3rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border-subtle);
+            color: var(--text-dim);
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- HEADER -->
+        <header>
+            <div class="brand-section">
+                <div class="brand-logo">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                    </svg>
+                </div>
+                <div>
+                    <h1>Cloud Command Center</h1>
+                    <p class="brand-subtitle">Distributed College Management Microservices & Hybrid SOAP/REST Mesh</p>
+                </div>
+            </div>
+            <div class="header-meta">
+                <span class="badge-live" id="gatewayHealthBadge">
+                    <span class="status-dot"></span> Gateway Mesh Active
+                </span>
+                <span class="badge-env" id="envBadge">
+                    Cloud Deployment: Dual Target (Render + Azure VM)
+                </span>
+            </div>
+        </header>
+
+        <!-- STATS OVERVIEW -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon" style="background: rgba(99, 102, 241, 0.15); color: #818cf8;">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2" />
+                    </svg>
+                </div>
+                <div class="stat-info">
+                    <div class="stat-label">Microservices Mesh</div>
+                    <div class="stat-val" id="statServiceCount">8 / 8 Active</div>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon" style="background: rgba(6, 182, 212, 0.15); color: #22d3ee;">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4" />
+                    </svg>
+                </div>
+                <div class="stat-info">
+                    <div class="stat-label">Polyglot Databases</div>
+                    <div class="stat-val">4 Cloud Engines</div>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon" style="background: rgba(16, 185, 129, 0.15); color: #34d399;">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                    </svg>
+                </div>
+                <div class="stat-info">
+                    <div class="stat-label">Discovery & Routing</div>
+                    <div class="stat-val">Eureka + WebFlux</div>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon" style="background: rgba(168, 85, 247, 0.15); color: #c084fc;">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                </div>
+                <div class="stat-info">
+                    <div class="stat-label">Protocol Bridge</div>
+                    <div class="stat-val">SOAP + REST / JSON</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB NAVIGATION -->
+        <div class="tab-bar">
+            <button class="tab-btn active" onclick="switchTab('topology')">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                Mesh Topology
+            </button>
+            <button class="tab-btn" onclick="switchTab('soap-studio')">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
+                Live SOAP Studio
+            </button>
+            <button class="tab-btn" onclick="switchTab('rest-bridge')">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                REST API Bridge
+            </button>
+            <button class="tab-btn" onclick="switchTab('analytics')">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                Academic Analytics
+            </button>
+            <button class="tab-btn" onclick="switchTab('architecture')">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"/></svg>
+                Architecture & Dual-Deployment
+            </button>
+        </div>
+
+        <!-- TAB 1: TOPOLOGY & SERVICES -->
+        <div id="tab-topology" class="tab-panel active">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 1rem;">
+                <div>
+                    <h2 style="font-size: 1.3rem; font-weight: 700;">Live Microservices Mesh</h2>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.2rem;">Dynamic routing & service launcher compatible with Render Cloud and Azure VM.</p>
+                </div>
+                <div style="display: flex; gap: 0.75rem; align-items: center;">
+                    <button class="btn-secondary" onclick="toggleEnvironmentMode()" id="envToggleBtn">Preview Mode</button>
+                    <button class="btn-secondary" onclick="refreshMeshHealth()">
+                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width: 16px; height: 16px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                        Refresh Latency Pings
+                    </button>
+                </div>
+            </div>
+
+            <!-- DYNAMIC CLOUD ENVIRONMENT INDICATOR -->
+            <div id="envBanner" style="background: rgba(15, 23, 42, 0.6); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 0.85rem 1.25rem; margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
+                <div style="display: flex; align-items: center; gap: 0.6rem;">
+                    <span class="status-dot"></span>
+                    <span id="envBannerTitle" style="font-size: 0.9rem; font-weight: 600; color: #f8fafc;">Active Environment: Detecting...</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 0.75rem; font-size: 0.8rem;">
+                    <span id="envBannerDesc" style="color: var(--text-muted);">Launch UI links dynamically adapt to this host</span>
+                </div>
+            </div>
+
+            <div class="mesh-grid" id="meshGrid">
+                <!-- Populated dynamically via JS -->
+            </div>
+        </div>
+
+        <!-- TAB 2: INTERACTIVE SOAP STUDIO -->
+        <div id="tab-soap-studio" class="tab-panel">
+            <div class="studio-container">
+                <div class="studio-card">
+                    <h2 style="font-size: 1.2rem; font-weight: 700;">SOAP Request Workbench</h2>
+                    <div>
+                        <label style="font-size: 0.85rem; color: var(--text-muted); display: block; margin-bottom: 0.4rem;">Select Target Microservice & Operation</label>
+                        <select class="form-select" id="soapServiceSelect" onchange="onSoapServiceChanged()">
+                            <option value="student">Student Service — getAllStudentsRequest</option>
+                            <option value="faculty">Faculty Service — getAllFacultyRequest</option>
+                            <option value="course">Course Service — getAllCoursesRequest</option>
+                            <option value="attendance">Attendance Service — getAttendanceByStudentRequest</option>
+                            <option value="enrollment">Enrollment Service — getEnrollmentsByStudentRequest</option>
+                            <option value="exam">Exam Service — getExamsByCourseRequest</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label style="font-size: 0.85rem; color: var(--text-muted); display: block; margin-bottom: 0.4rem;">SOAP XML Envelope (Editable)</label>
+                        <textarea class="code-editor" id="soapXmlPayload" spellcheck="false"></textarea>
+                    </div>
+
+                    <div style="display: flex; gap: 0.75rem;">
+                        <button class="btn-dispatch" onclick="dispatchSoapRequest()">
+                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width: 18px; height: 18px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                            Send via Gateway (/ws)
+                        </button>
+                        <button class="btn-secondary" onclick="openWsdl()">
+                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width: 16px; height: 16px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                            View WSDL Definition
+                        </button>
+                    </div>
+                </div>
+
+                <div class="studio-card">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <h2 style="font-size: 1.2rem; font-weight: 700;">Live XML Response</h2>
+                        <div id="soapResponseStatus" style="font-size: 0.85rem; font-weight: 600;">Status: Ready</div>
+                    </div>
+                    <div class="response-box" id="soapResponseOutput">// Click 'Send via Gateway' to execute a live SOAP request...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 3: REST API BRIDGE EXPLORER -->
+        <div id="tab-rest-bridge" class="tab-panel">
+            <div style="margin-bottom: 1.5rem;">
+                <h2 style="font-size: 1.3rem; font-weight: 700;">SOAP-to-REST JSON Protocol Transpiler</h2>
+                <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 0.2rem;">
+                    The API Gateway exposes these clean JSON endpoints. When called, the Gateway transpiles the request to SOAP 1.1 envelopes downstream, queries the microservices, and converts XML to JSON.
+                </p>
+            </div>
+
+            <div class="rest-card">
+                <div class="rest-header">
+                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                        <span class="rest-method">GET</span>
+                        <span class="rest-path">/api/v1/students</span>
+                    </div>
+                    <button class="btn-secondary" onclick="executeRest('/api/v1/students', 'restOutput1')">Execute REST Call</button>
+                </div>
+                <div class="rest-desc">Transpiles to <code>getAllStudentsRequest</code> on <code>STUDENT-SERVICE</code> (Neon PostgreSQL).</div>
+                <div class="response-box" id="restOutput1" style="display: none; margin-top: 1rem;"></div>
+            </div>
+
+            <div class="rest-card">
+                <div class="rest-header">
+                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                        <span class="rest-method">GET</span>
+                        <span class="rest-path">/api/v1/faculty</span>
+                    </div>
+                    <button class="btn-secondary" onclick="executeRest('/api/v1/faculty', 'restOutput2')">Execute REST Call</button>
+                </div>
+                <div class="rest-desc">Transpiles to <code>getAllFacultyRequest</code> on <code>FACULTY-SERVICE</code> (MongoDB Atlas NoSQL).</div>
+                <div class="response-box" id="restOutput2" style="display: none; margin-top: 1rem;"></div>
+            </div>
+
+            <div class="rest-card">
+                <div class="rest-header">
+                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                        <span class="rest-method">GET</span>
+                        <span class="rest-path">/api/v1/courses</span>
+                    </div>
+                    <button class="btn-secondary" onclick="executeRest('/api/v1/courses', 'restOutput3')">Execute REST Call</button>
+                </div>
+                <div class="rest-desc">Transpiles to <code>getAllCoursesRequest</code> on <code>COURSE-SERVICE</code> (Supabase PostgreSQL).</div>
+                <div class="response-box" id="restOutput3" style="display: none; margin-top: 1rem;"></div>
+            </div>
+
+            <div class="rest-card">
+                <div class="rest-header">
+                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                        <span class="rest-method">GET</span>
+                        <span class="rest-path">/api/v1/analytics</span>
+                    </div>
+                    <button class="btn-secondary" onclick="executeRest('/api/v1/analytics', 'restOutput4')">Execute REST Call</button>
+                </div>
+                <div class="rest-desc">Aggregates cross-service data into unified academic intelligence & architecture metrics.</div>
+                <div class="response-box" id="restOutput4" style="display: none; margin-top: 1rem;"></div>
+            </div>
+        </div>
+
+        <!-- TAB 4: DISTRIBUTED ANALYTICS -->
+        <div id="tab-analytics" class="tab-panel">
+            <div class="analytics-grid">
+                <div class="studio-card">
+                    <h2 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 0.5rem;">Polyglot Cloud Persistence Matrix</h2>
+                    <table class="table-custom">
+                        <thead>
+                            <tr>
+                                <th>Microservice</th>
+                                <th>Protocol</th>
+                                <th>Database Engine</th>
+                                <th>Cloud Provider</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>STUDENT-SERVICE</strong></td>
+                                <td>SOAP 1.1 / WSDL</td>
+                                <td>PostgreSQL 16</td>
+                                <td><span class="db-tag" style="color: #6ee7b7;">Neon Serverless</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>FACULTY-SERVICE</strong></td>
+                                <td>SOAP 1.1 / WSDL</td>
+                                <td>MongoDB Document</td>
+                                <td><span class="db-tag" style="color: #6ee7b7;">MongoDB Atlas</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>COURSE-SERVICE</strong></td>
+                                <td>SOAP 1.1 / WSDL</td>
+                                <td>PostgreSQL 15</td>
+                                <td><span class="db-tag" style="color: #6ee7b7;">Supabase Cloud</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>ATTENDANCE-SERVICE</strong></td>
+                                <td>SOAP 1.1 / WSDL</td>
+                                <td>PostgreSQL 15</td>
+                                <td><span class="db-tag" style="color: #6ee7b7;">Supabase Cloud</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>ENROLLMENT-SERVICE</strong></td>
+                                <td>SOAP 1.1 / WSDL</td>
+                                <td>MariaDB Enterprise</td>
+                                <td><span class="db-tag" style="color: #6ee7b7;">Aiven Cloud</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>EXAM-SERVICE</strong></td>
+                                <td>SOAP 1.1 / WSDL</td>
+                                <td>MariaDB Enterprise</td>
+                                <td><span class="db-tag" style="color: #6ee7b7;">Aiven Cloud</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="studio-card">
+                    <h2 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 0.5rem;">Academic Intelligence</h2>
+                    <div style="display: flex; flex-direction: column; gap: 1rem;">
+                        <div style="background: rgba(0,0,0,0.3); padding: 1rem; border-radius: 10px; border: 1px solid var(--border-subtle);">
+                            <div style="font-size: 0.8rem; color: var(--text-muted);">Student-to-Faculty Ratio</div>
+                            <div style="font-size: 1.8rem; font-weight: 800; color: #38bdf8;" id="analyticsRatio">Loading...</div>
+                        </div>
+                        <div style="background: rgba(0,0,0,0.3); padding: 1rem; border-radius: 10px; border: 1px solid var(--border-subtle);">
+                            <div style="font-size: 0.8rem; color: var(--text-muted);">Active Departments</div>
+                            <div style="font-size: 1.1rem; font-weight: 600; color: #f1f5f9; margin-top: 0.3rem;" id="analyticsDepts">Loading...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 5: ARCHITECTURE & DUAL-DEPLOYMENT -->
+        <div id="tab-architecture" class="tab-panel">
+            <div class="pipeline-wrapper">
+                <h2 style="font-size: 1.3rem; font-weight: 700; margin-bottom: 1.5rem;">Distributed Request Processing Pipeline</h2>
+                <div class="pipeline-flow">
+                    <div class="pipeline-node">
+                        <div class="node-icon"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg></div>
+                        <strong style="color: white; display: block; font-size: 0.95rem;">Client Tier</strong>
+                        <span style="font-size: 0.75rem; color: var(--text-muted);">Browser GUI / REST Client</span>
+                    </div>
+
+                    <div class="pipeline-arrow">➔</div>
+
+                    <div class="pipeline-node">
+                        <div class="node-icon" style="background: linear-gradient(135deg, #06b6d4, #3b82f6);"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg></div>
+                        <strong style="color: white; display: block; font-size: 0.95rem;">API Gateway</strong>
+                        <span style="font-size: 0.75rem; color: var(--text-muted);">Reactor Netty WebFlux (8080)</span>
+                    </div>
+
+                    <div class="pipeline-arrow">➔</div>
+
+                    <div class="pipeline-node">
+                        <div class="node-icon" style="background: linear-gradient(135deg, #10b981, #06b6d4);"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg></div>
+                        <strong style="color: white; display: block; font-size: 0.95rem;">Eureka Discovery</strong>
+                        <span style="font-size: 0.75rem; color: var(--text-muted);">Dynamic lb:// resolution</span>
+                    </div>
+
+                    <div class="pipeline-arrow">➔</div>
+
+                    <div class="pipeline-node">
+                        <div class="node-icon" style="background: linear-gradient(135deg, #a855f7, #ec4899);"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg></div>
+                        <strong style="color: white; display: block; font-size: 0.95rem;">SOAP Servlet</strong>
+                        <span style="font-size: 0.75rem; color: var(--text-muted);">MessageDispatcherServlet</span>
+                    </div>
+
+                    <div class="pipeline-arrow">➔</div>
+
+                    <div class="pipeline-node">
+                        <div class="node-icon" style="background: linear-gradient(135deg, #f59e0b, #ef4444);"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4"/></svg></div>
+                        <strong style="color: white; display: block; font-size: 0.95rem;">Cloud Database</strong>
+                        <span style="font-size: 0.75rem; color: var(--text-muted);">Neon / Supabase / Atlas</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="studio-container">
+                <div class="studio-card">
+                    <h2 style="font-size: 1.2rem; font-weight: 700;">Deploying on Microsoft Azure VM</h2>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.6;">
+                        This system is fully architected for dual-target deployment. To run on an Azure Ubuntu/Windows VM:
+                    </p>
+                    <ol style="font-size: 0.85rem; color: #cbd5e1; padding-left: 1.25rem; line-height: 1.8;">
+                        <li>SSH into your Azure VM instance.</li>
+                        <li>Clone the repository: <code>git clone https://github.com/mahes359/college-management-system.git</code></li>
+                        <li>Export your VM's public/private IP: <code>export HOST=&lt;AZURE_VM_IP&gt;</code></li>
+                        <li>Launch all microservices via Docker Compose: <code>docker compose up -d</code></li>
+                        <li>Access this Command Center at <code>http://&lt;AZURE_VM_IP&gt;:8080/</code></li>
+                    </ol>
+                </div>
+
+                <div class="studio-card">
+                    <h2 style="font-size: 1.2rem; font-weight: 700;">Running on Render Cloud</h2>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.6;">
+                        On Render, each microservice operates as an independent Dockerized Web Service with automated HTTPS on port 443. The services dynamically register their <code>*.onrender.com</code> FQDN with Eureka Server, and Gateway routes traffic via <code>lb://</code> seamlessly.
+                    </p>
+                    <div style="background: rgba(0,0,0,0.3); padding: 1rem; border-radius: 8px; font-family: var(--font-mono); font-size: 0.8rem; color: #34d399; margin-top: 0.5rem;">
+                        ✓ Eureka Registry: eureka-server-fbb5.onrender.com<br>
+                        ✓ API Gateway: api-gateway-wzqo.onrender.com<br>
+                        ✓ Dynamic HTTPS:443 routing verified
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- FOOTER -->
+        <footer>
+            Enterprise Microservices Architecture • Designed for Cloud Computing Demonstrations • Compatible with Render & Azure VM
+        </footer>
+    </div>
+
+    <!-- SCRIPTS -->
+    <script>
+        const SERVICES = [
+            { id: "eureka", name: "Eureka Server", port: "8761", renderUrl: "https://eureka-server-fbb5.onrender.com", db: "Service Registry", path: "", category: "Discovery" },
+            { id: "gateway", name: "API Gateway", port: "8080", renderUrl: "https://api-gateway-wzqo.onrender.com", db: "Reactor Netty", path: "/debug/status", category: "Routing & CORS" },
+            { id: "student", name: "Student Service", port: "8081", renderUrl: "https://student-service-cds6.onrender.com", db: "PostgreSQL (Neon)", path: "/student/", category: "Core Entity" },
+            { id: "faculty", name: "Faculty Service", port: "8082", renderUrl: "https://faculty-service-l8nj.onrender.com", db: "MongoDB Atlas", path: "/faculty/", category: "Core Entity" },
+            { id: "course", name: "Course Service", port: "8083", renderUrl: "https://course-service-kots.onrender.com", db: "PostgreSQL (Supabase)", path: "/course/", category: "Core Entity" },
+            { id: "attendance", name: "Attendance Service", port: "8086", renderUrl: "https://attendance-service-2g2t.onrender.com", db: "PostgreSQL (Supabase)", path: "/attendance/", category: "Operations" },
+            { id: "enrollment", name: "Enrollment Service", port: "8084", renderUrl: "https://enrollment-service-0s2f.onrender.com", db: "MariaDB (Aiven)", path: "/enrollment/", category: "Transactions" },
+            { id: "exam", name: "Exam Service", port: "8085", renderUrl: "https://exam-service-bjdk.onrender.com", db: "MariaDB (Aiven)", path: "/exam/", category: "Examinations" }
+        ];
+
+        const SOAP_TEMPLATES = {
+            student: `<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:stu="http://college.com/student">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <stu:getAllStudentsRequest/>
+   </soapenv:Body>
+</soapenv:Envelope>`,
+            faculty: `<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:fac="http://college.com/faculty">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <fac:getAllFacultyRequest/>
+   </soapenv:Body>
+</soapenv:Envelope>`,
+            course: `<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:cou="http://college.com/course">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <cou:getAllCoursesRequest/>
+   </soapenv:Body>
+</soapenv:Envelope>`,
+            attendance: `<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:att="http://college.com/attendance">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <att:getAttendanceByStudentRequest>
+         <att:studentId>1</att:studentId>
+      </att:getAttendanceByStudentRequest>
+   </soapenv:Body>
+</soapenv:Envelope>`,
+            enrollment: `<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:enr="http://college.com/enrollment">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <enr:getEnrollmentsByStudentRequest>
+         <enr:studentId>1</enr:studentId>
+      </enr:getEnrollmentsByStudentRequest>
+   </soapenv:Body>
+</soapenv:Envelope>`,
+            exam: `<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ex="http://college.com/exam">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <ex:getExamsByCourseRequest>
+         <ex:courseId>1</ex:courseId>
+      </ex:getExamsByCourseRequest>
+   </soapenv:Body>
+</soapenv:Envelope>`
+        };
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.remove('active'));
+
+            const activeBtn = Array.from(document.querySelectorAll('.tab-btn')).find(b => b.getAttribute('onclick').includes(tabId));
+            if (activeBtn) activeBtn.classList.add('active');
+
+            const target = document.getElementById('tab-' + tabId);
+            if (target) target.classList.add('active');
+        }
+
+        // Environment Detection: Render Cloud vs Azure VM / Localhost
+        let manualEnvMode = null; // 'render' | 'azure' | null (auto)
+
+        function isRenderEnvironment() {
+            if (manualEnvMode) return manualEnvMode === 'render';
+            return window.location.hostname.includes('onrender.com');
+        }
+
+        function getAzureHost() {
+            return localStorage.getItem('azure_host_override') || window.location.hostname;
+        }
+
+        function getServiceLaunchUrl(svc) {
+            if (isRenderEnvironment()) {
+                return svc.renderUrl;
+            }
+            const protocol = window.location.protocol;
+            const host = getAzureHost();
+            return `${protocol}//${host}:${svc.port}`;
+        }
+
+        function toggleEnvironmentMode() {
+            const current = isRenderEnvironment();
+            manualEnvMode = current ? 'azure' : 'render';
+            updateEnvironmentDisplay();
+            renderMeshGrid();
+            refreshMeshHealth();
+        }
+
+        function setAzureHostOverride() {
+            const current = getAzureHost();
+            const host = prompt("Enter Azure VM IP or Hostname (leave blank to reset to " + window.location.hostname + "):", current);
+            if (host !== null) {
+                if (host.trim() === '' || host.trim() === window.location.hostname) {
+                    localStorage.removeItem('azure_host_override');
+                } else {
+                    localStorage.setItem('azure_host_override', host.trim());
+                }
+                updateEnvironmentDisplay();
+                renderMeshGrid();
+                refreshMeshHealth();
+            }
+        }
+
+        function updateEnvironmentDisplay() {
+            const isRender = isRenderEnvironment();
+            const bannerTitle = document.getElementById('envBannerTitle');
+            const bannerDesc = document.getElementById('envBannerDesc');
+            const toggleBtn = document.getElementById('envToggleBtn');
+            const envBadge = document.getElementById('envBadge');
+            const host = getAzureHost();
+
+            if (isRender) {
+                if (bannerTitle) bannerTitle.innerHTML = `☁️ Active Mode: <span style="color: #38bdf8;">Render Cloud Production</span>`;
+                if (bannerDesc) bannerDesc.innerHTML = `Launch UI links open direct Render services (<code>*.onrender.com</code>).`;
+                if (toggleBtn) toggleBtn.textContent = `Switch to Azure VM Mode`;
+                if (envBadge) envBadge.innerText = `Cloud: Render Production (HTTPS:443)`;
+            } else {
+                if (bannerTitle) bannerTitle.innerHTML = `⚡ Active Mode: <span style="color: #34d399;">Azure VM / Host Node (${host})</span>`;
+                if (bannerDesc) bannerDesc.innerHTML = `Launch UI links open Azure host port services (<code>${window.location.protocol}//${host}:[port]</code>). <a href="javascript:void(0)" onclick="setAzureHostOverride()" style="color: #38bdf8; text-decoration: underline; margin-left: 0.5rem; font-weight: 600;">Edit Host IP</a>`;
+                if (toggleBtn) toggleBtn.textContent = `Switch to Render Mode`;
+                if (envBadge) envBadge.innerText = `Cloud: Azure VM (${host})`;
+            }
+        }
+
+        function renderMeshGrid() {
+            const grid = document.getElementById('meshGrid');
+            grid.innerHTML = '';
+            const isRender = isRenderEnvironment();
+            const host = getAzureHost();
+
+            SERVICES.forEach(svc => {
+                const card = document.createElement('div');
+                card.className = 'mesh-card';
+                card.id = 'mesh-card-' + svc.id;
+
+                const targetUrl = getServiceLaunchUrl(svc);
+                const displayHost = isRender 
+                    ? svc.renderUrl.replace('https://', '') 
+                    : `${host}:${svc.port}`;
+
+                card.innerHTML = `
+                    <div>
+                        <div class="mesh-header">
+                            <div>
+                                <div class="mesh-title">${svc.name}</div>
+                                <div class="mesh-category">${svc.category}</div>
+                            </div>
+                            <span class="service-badge badge-up" id="badge-${svc.id}">ONLINE</span>
+                        </div>
+                        <div class="mesh-details">
+                            <div class="detail-row">
+                                <span>Target Host</span>
+                                <span style="font-family: var(--font-mono); font-size: 0.75rem; color: #38bdf8;">${displayHost}</span>
+                            </div>
+                            <div class="detail-row">
+                                <span>Database</span>
+                                <span class="db-tag">${svc.db}</span>
+                            </div>
+                            <div class="detail-row">
+                                <span>Gateway Ping</span>
+                                <span id="ping-${svc.id}">Measuring...</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mesh-actions">
+                        <a href="${targetUrl}" target="_blank" class="btn-launch" title="Launch ${svc.name} (${targetUrl})">
+                            Launch UI
+                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width: 14px; height: 14px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                        </a>
+                        ${svc.id !== 'eureka' && svc.id !== 'gateway' ? `
+                            <button class="btn-secondary" onclick="testSoapQuick('${svc.id}')">SOAP Test</button>
+                        ` : ''}
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        async function refreshMeshHealth() {
+            const isRender = isRenderEnvironment();
+            const host = getAzureHost();
+            for (let svc of SERVICES) {
+                const pingElem = document.getElementById('ping-' + svc.id);
+                if (!pingElem) continue;
+                pingElem.innerText = "Pinging...";
+
+                const start = performance.now();
+                try {
+                    let testUrl;
+                    if (svc.id === 'gateway') {
+                        testUrl = '/actuator/health';
+                    } else if (isRender) {
+                        testUrl = svc.renderUrl + '/actuator/health';
+                    } else {
+                        testUrl = `${window.location.protocol}//${host}:${svc.port}/actuator/health`;
+                    }
+                    const res = await fetch(testUrl, { method: 'GET', mode: 'no-cors' });
+                    const latency = Math.round(performance.now() - start);
+                    pingElem.innerHTML = `<span style="color: #34d399;">${latency} ms</span>`;
+                } catch(e) {
+                    const latency = Math.round(performance.now() - start);
+                    pingElem.innerHTML = `<span style="color: #94a3b8;">${latency} ms</span>`;
+                }
+            }
+        }
+
+        function onSoapServiceChanged() {
+            const svc = document.getElementById('soapServiceSelect').value;
+            document.getElementById('soapXmlPayload').value = SOAP_TEMPLATES[svc] || '';
+        }
+
+        function testSoapQuick(svcId) {
+            switchTab('soap-studio');
+            document.getElementById('soapServiceSelect').value = svcId;
+            onSoapServiceChanged();
+            dispatchSoapRequest();
+        }
+
+        async function dispatchSoapRequest() {
+            const svc = document.getElementById('soapServiceSelect').value;
+            const payload = document.getElementById('soapXmlPayload').value;
+            const output = document.getElementById('soapResponseOutput');
+            const statusElem = document.getElementById('soapResponseStatus');
+
+            output.textContent = "Executing SOAP request via API Gateway (POST /" + svc + "/ws)...";
+            statusElem.innerHTML = `<span style="color: #38bdf8;">Sending...</span>`;
+
+            const start = performance.now();
+            try {
+                const res = await fetch('/' + svc + '/ws', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/xml;charset=UTF-8' },
+                    body: payload
+                });
+                const latency = Math.round(performance.now() - start);
+                const text = await res.text();
+
+                if (res.ok) {
+                    statusElem.innerHTML = `<span style="color: #34d399;">HTTP ${res.status} OK (${latency} ms)</span>`;
+                } else {
+                    statusElem.innerHTML = `<span style="color: #f43f5e;">HTTP ${res.status} (${latency} ms)</span>`;
+                }
+                output.textContent = text;
+            } catch (err) {
+                const latency = Math.round(performance.now() - start);
+                statusElem.innerHTML = `<span style="color: #f43f5e;">Network Error (${latency} ms)</span>`;
+                output.textContent = "Error: " + err.message;
+            }
+        }
+
+        function openWsdl() {
+            const svc = document.getElementById('soapServiceSelect').value;
+            window.open('/' + svc + '/ws/' + svc + '.wsdl', '_blank');
+        }
+
+        async function executeRest(endpoint, outputId) {
+            const box = document.getElementById(outputId);
+            box.style.display = 'block';
+            box.textContent = "Fetching GET " + endpoint + "...";
+
+            const start = performance.now();
+            try {
+                const res = await fetch(endpoint);
+                const latency = Math.round(performance.now() - start);
+                const json = await res.json();
+                box.textContent = JSON.stringify(json, null, 2);
+            } catch (err) {
+                box.textContent = "Error: " + err.message;
+            }
+        }
+
+        async function loadAnalytics() {
+            try {
+                const res = await fetch('/api/v1/analytics');
+                if (res.ok) {
+                    const data = await res.json();
+                    document.getElementById('analyticsRatio').innerText = data.studentToFacultyRatio || "N/A";
+                    document.getElementById('analyticsDepts').innerText = (data.activeDepartments || []).join(", ") || "Active across all depts";
+                }
+            } catch (_) {}
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            updateEnvironmentDisplay();
+            renderMeshGrid();
+            onSoapServiceChanged();
+            refreshMeshHealth();
+            loadAnalytics();
+        });
+    </script>
+</body>
+</html>

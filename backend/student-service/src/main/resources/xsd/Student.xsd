@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:tns="http://college.com/student"
+           targetNamespace="http://college.com/student"
+           elementFormDefault="qualified">
+
+    <xs:group name="studentFieldsGroup">
+        <xs:sequence>
+            <xs:element name="studentNumber" type="xs:string"/>
+            <xs:element name="admissionNumber" type="xs:string" minOccurs="0"/>
+            <xs:element name="firstName" type="xs:string"/>
+            <xs:element name="lastName" type="xs:string"/>
+            <xs:element name="dateOfBirth" type="xs:date" minOccurs="0"/>
+            <xs:element name="gender" type="xs:string" minOccurs="0"/>
+            <xs:element name="email" type="xs:string"/>
+            <xs:element name="phone" type="xs:string" minOccurs="0"/>
+            <xs:element name="address" type="xs:string" minOccurs="0"/>
+            <xs:element name="city" type="xs:string" minOccurs="0"/>
+            <xs:element name="state" type="xs:string" minOccurs="0"/>
+            <xs:element name="country" type="xs:string" minOccurs="0"/>
+            <xs:element name="bloodGroup" type="xs:string" minOccurs="0"/>
+            <xs:element name="parentGuardianInfo" type="xs:string" minOccurs="0"/>
+            <xs:element name="emergencyContact" type="xs:string" minOccurs="0"/>
+            <xs:element name="department" type="xs:string"/>
+            <xs:element name="program" type="xs:string" minOccurs="0"/>
+            <xs:element name="year" type="xs:int"/>
+            <xs:element name="semester" type="xs:int" minOccurs="0"/>
+            <xs:element name="section" type="xs:string" minOccurs="0"/>
+            <xs:element name="admissionDate" type="xs:date" minOccurs="0"/>
+            <xs:element name="studentStatus" type="xs:string" minOccurs="0"/>
+            <xs:element name="profileInformation" type="xs:string" minOccurs="0"/>
+        </xs:sequence>
+    </xs:group>
+
+    <xs:element name="createStudentRequest">
+        <xs:complexType>
+            <xs:group ref="tns:studentFieldsGroup"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="createStudentResponse">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="student" type="tns:student"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="getStudentRequest">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="studentId" type="xs:long"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="getStudentResponse">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="student" type="tns:student"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="getAllStudentsRequest">
+        <xs:complexType>
+            <xs:sequence/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="getAllStudentsResponse">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="students" type="tns:student" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="updateStudentRequest">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="studentId" type="xs:long"/>
+                <xs:group ref="tns:studentFieldsGroup"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="updateStudentResponse">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="student" type="tns:student"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="deleteStudentRequest">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="studentId" type="xs:long"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="deleteStudentResponse">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="success" type="xs:boolean"/>
+                <xs:element name="message" type="xs:string"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:complexType name="student">
+        <xs:sequence>
+            <xs:element name="id" type="xs:long"/>
+            <xs:group ref="tns:studentFieldsGroup"/>
+        </xs:sequence>
+    </xs:complexType>
+
+</xs:schema>

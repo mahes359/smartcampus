@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bindings xmlns="https://jakarta.ee/xml/ns/jaxb"
+          xmlns:xs="http://www.w3.org/2001/XMLSchema"
+          xmlns:xjc="http://java.sun.com/xml/ns/jaxb/xjc"
+          version="3.0">
+    <globalBindings>
+        <xjc:javaType name="java.time.LocalDate" xmlType="xs:date" adapter="com.smartcampus.attendance.config.LocalDateAdapter"/>
+    </globalBindings>
+    <bindings schemaLocation="Attendance.xsd">
+        <schemaBindings>
+            <package name="com.smartcampus.attendance.soap"/>
+        </schemaBindings>
+    </bindings>
+</bindings>
