@@ -6,13 +6,21 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="course-service" />
-        <module name="attendance-service" />
         <module name="api-gateway" />
-        <module name="faculty-service" />
-        <module name="student-service" />
         <module name="eureka-server" />
         <module name="exam-service" />
+      </profile>
+      <profile name="Annotation profile for attendance-service" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="false">
+          <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.46/lombok-1.18.46.jar" />
+        </processorPath>
+        <module name="course-service" />
+        <module name="faculty-service" />
+        <module name="student-service" />
+        <module name="attendance-service" />
         <module name="enrollment-service" />
       </profile>
     </annotationProcessing>
