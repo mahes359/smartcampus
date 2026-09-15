@@ -2,23 +2,26 @@ services:
   # =====================================================
   # 1. DATABASE (PostgreSQL - Multi-Tenant Auto-Init)
   # =====================================================
-  postgres-db:
+  postgres:
     image: postgres:16-alpine
     container_name: smartcampus-postgres
     restart: unless-stopped
+    command: "postgres -c max_connections=300"
     environment:
-      POSTGRES_USER: ${DB_USERNAME:-postgres}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
-    ports:
-      - "5432:5432"
+      POSTGRES_USER: ${POSTGRES_USER:-collegeuser}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-collegepass}
+      POSTGRES_DB: ${POSTGRES_DB:-college_auth}
+    expose:
+      - "5432"
     volumes:
       - ./backend/docker/init-databases.sql:/docker-entrypoint-initdb.d/init-databases.sql
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:-postgres}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-collegeuser} -d college_auth"]
       interval: 5s
       timeout: 5s
-      retries: 5
+      retries: 10
+      start_period: 10s
     networks:
       - smartcampus-network
 
@@ -28,17 +31,21 @@ services:
   eureka-server:
     build:
       context: ./backend/eureka-server
+    image: smartcampus-eureka:latest
     container_name: smartcampus-eureka
     restart: unless-stopped
     ports:
       - "8761:8761"
     environment:
       - PORT=8761
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:8761/actuator/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
     networks:
       - smartcampus-network
-    profiles:
-      - core
-      - all
 
   # =====================================================
   # 3. API GATEWAY
@@ -46,6 +53,7 @@ services:
   api-gateway:
     build:
       context: ./backend/api-gateway
+    image: smartcampus-gateway:latest
     container_name: smartcampus-gateway
     restart: unless-stopped
     ports:
@@ -54,483 +62,541 @@ services:
       - PORT=8080
       - EUREKA_URL=http://eureka-server:8761/eureka/
     depends_on:
-      - eureka-server
-    networks:
-      - smartcampus-network
-    profiles:
-      - core
-      - all
-
-  # =====================================================
-  # 4. CORE SERVICES (Auth & College Multi-Tenant)
-  # =====================================================
-  auth-service:
-    build:
-      context: ./backend/auth-service
-    container_name: smartcampus-auth
-    restart: unless-stopped
-    ports:
-      - "8090:8090"
-    environment:
-      - PORT=8090
-      - EUREKA_URL=http://eureka-server:8761/eureka/
-      - DB_HOST=postgres-db
-      - POSTGRES_HOST=postgres-db
-      - DB_USERNAME=${DB_USERNAME:-postgres}
-      - DB_PASSWORD=${DB_PASSWORD:-postgres}
-    depends_on:
-      postgres-db:
-        condition: service_healthy
       eureka-server:
-        condition: service_started
-    networks:
-      - smartcampus-network
-    profiles:
-      - core
-      - all
-
-  college-service:
-    build:
-      context: ./backend/college-service
-    container_name: smartcampus-college
-    restart: unless-stopped
-    ports:
-      - "8091:8091"
-    environment:
-      - PORT=8091
-      - EUREKA_URL=http://eureka-server:8761/eureka/
-      - DB_HOST=postgres-db
-      - POSTGRES_HOST=postgres-db
-      - DB_USERNAME=${DB_USERNAME:-postgres}
-      - DB_PASSWORD=${DB_PASSWORD:-postgres}
-    depends_on:
-      postgres-db:
         condition: service_healthy
-      eureka-server:
-        condition: service_started
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:8080/actuator/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 25s
     networks:
       - smartcampus-network
-    profiles:
-      - core
-      - all
 
   # =====================================================
-  # 5. FRONTEND WEB APPLICATION (React + Vite + Nginx)
+  # 4. FRONTEND WEB APPLICATION (React + Vite + Nginx)
   # =====================================================
   frontend:
     build:
       context: ./frontend
+    image: smartcampus-frontend:latest
     container_name: smartcampus-frontend
     restart: unless-stopped
     ports:
+      - "80:80"
       - "5173:80"
     depends_on:
       - api-gateway
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:80/ || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
     networks:
       - smartcampus-network
-    profiles:
-      - core
-      - all
 
   # =====================================================
-  # 6. DOMAIN MICROSERVICES (Academic & Operations)
+  # 5. CORE BUSINESS MICROSERVICES
   # =====================================================
+  auth-service:
+    build:
+      context: ./backend/auth-service
+    image: smartcampus-auth:latest
+    container_name: smartcampus-auth
+    restart: unless-stopped
+    expose:
+      - "8090"
+    environment:
+      - PORT=8090
+      - EUREKA_URL=http://eureka-server:8761/eureka/
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - DB_USERNAME=${POSTGRES_USER:-collegeuser}
+      - DB_PASSWORD=${POSTGRES_PASSWORD:-collegepass}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      eureka-server:
+        condition: service_started
+    networks:
+      - smartcampus-network
+
+  college-service:
+    build:
+      context: ./backend/college-service
+    image: smartcampus-college:latest
+    container_name: smartcampus-college
+    restart: unless-stopped
+    expose:
+      - "8091"
+    environment:
+      - PORT=8091
+      - EUREKA_URL=http://eureka-server:8761/eureka/
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - DB_USERNAME=${POSTGRES_USER:-collegeuser}
+      - DB_PASSWORD=${POSTGRES_PASSWORD:-collegepass}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      eureka-server:
+        condition: service_started
+    networks:
+      - smartcampus-network
+
   student-service:
     build:
       context: ./backend/student-service
+    image: smartcampus-student:latest
     container_name: smartcampus-student
-    ports:
-      - "8092:8092"
+    restart: unless-stopped
+    expose:
+      - "8092"
     environment:
       - PORT=8092
       - EUREKA_URL=http://eureka-server:8761/eureka/
-      - DB_HOST=postgres-db
-      - POSTGRES_HOST=postgres-db
-      - DB_USERNAME=${DB_USERNAME:-postgres}
-      - DB_PASSWORD=${DB_PASSWORD:-postgres}
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - DB_USERNAME=${POSTGRES_USER:-collegeuser}
+      - DB_PASSWORD=${POSTGRES_PASSWORD:-collegepass}
     depends_on:
-      postgres-db:
+      postgres:
         condition: service_healthy
+      eureka-server:
+        condition: service_started
     networks:
       - smartcampus-network
-    profiles:
-      - all
 
   faculty-service:
     build:
       context: ./backend/faculty-service
+    image: smartcampus-faculty:latest
     container_name: smartcampus-faculty
-    ports:
-      - "8093:8093"
+    restart: unless-stopped
+    expose:
+      - "8093"
     environment:
       - PORT=8093
       - EUREKA_URL=http://eureka-server:8761/eureka/
-      - DB_HOST=postgres-db
-      - POSTGRES_HOST=postgres-db
-      - DB_USERNAME=${DB_USERNAME:-postgres}
-      - DB_PASSWORD=${DB_PASSWORD:-postgres}
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - DB_USERNAME=${POSTGRES_USER:-collegeuser}
+      - DB_PASSWORD=${POSTGRES_PASSWORD:-collegepass}
     depends_on:
-      postgres-db:
+      postgres:
         condition: service_healthy
+      eureka-server:
+        condition: service_started
     networks:
       - smartcampus-network
-    profiles:
-      - all
 
   course-service:
     build:
       context: ./backend/course-service
+    image: smartcampus-course:latest
     container_name: smartcampus-course
-    ports:
-      - "8094:8094"
+    restart: unless-stopped
+    expose:
+      - "8094"
     environment:
       - PORT=8094
       - EUREKA_URL=http://eureka-server:8761/eureka/
-      - DB_HOST=postgres-db
-      - POSTGRES_HOST=postgres-db
-      - DB_USERNAME=${DB_USERNAME:-postgres}
-      - DB_PASSWORD=${DB_PASSWORD:-postgres}
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - DB_USERNAME=${POSTGRES_USER:-collegeuser}
+      - DB_PASSWORD=${POSTGRES_PASSWORD:-collegepass}
     depends_on:
-      postgres-db:
+      postgres:
         condition: service_healthy
+      eureka-server:
+        condition: service_started
     networks:
       - smartcampus-network
-    profiles:
-      - all
 
   enrollment-service:
     build:
       context: ./backend/enrollment-service
+    image: smartcampus-enrollment:latest
     container_name: smartcampus-enrollment
-    ports:
-      - "8095:8095"
+    restart: unless-stopped
+    expose:
+      - "8095"
     environment:
       - PORT=8095
       - EUREKA_URL=http://eureka-server:8761/eureka/
-      - DB_HOST=postgres-db
-      - POSTGRES_HOST=postgres-db
-      - DB_USERNAME=${DB_USERNAME:-postgres}
-      - DB_PASSWORD=${DB_PASSWORD:-postgres}
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - DB_USERNAME=${POSTGRES_USER:-collegeuser}
+      - DB_PASSWORD=${POSTGRES_PASSWORD:-collegepass}
     depends_on:
-      postgres-db:
+      postgres:
         condition: service_healthy
+      eureka-server:
+        condition: service_started
     networks:
       - smartcampus-network
-    profiles:
-      - all
 
   attendance-service:
     build:
       context: ./backend/attendance-service
+    image: smartcampus-attendance:latest
     container_name: smartcampus-attendance
-    ports:
-      - "8096:8096"
+    restart: unless-stopped
+    expose:
+      - "8096"
     environment:
       - PORT=8096
       - EUREKA_URL=http://eureka-server:8761/eureka/
-      - DB_HOST=postgres-db
-      - POSTGRES_HOST=postgres-db
-      - DB_USERNAME=${DB_USERNAME:-postgres}
-      - DB_PASSWORD=${DB_PASSWORD:-postgres}
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - DB_USERNAME=${POSTGRES_USER:-collegeuser}
+      - DB_PASSWORD=${POSTGRES_PASSWORD:-collegepass}
     depends_on:
-      postgres-db:
+      postgres:
         condition: service_healthy
+      eureka-server:
+        condition: service_started
     networks:
       - smartcampus-network
-    profiles:
-      - all
 
   exam-service:
     build:
       context: ./backend/exam-service
+    image: smartcampus-exam:latest
     container_name: smartcampus-exam
-    ports:
-      - "8097:8097"
+    restart: unless-stopped
+    expose:
+      - "8097"
     environment:
       - PORT=8097
       - EUREKA_URL=http://eureka-server:8761/eureka/
-      - DB_HOST=postgres-db
-      - POSTGRES_HOST=postgres-db
-      - DB_USERNAME=${DB_USERNAME:-postgres}
-      - DB_PASSWORD=${DB_PASSWORD:-postgres}
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - DB_USERNAME=${POSTGRES_USER:-collegeuser}
+      - DB_PASSWORD=${POSTGRES_PASSWORD:-collegepass}
     depends_on:
-      postgres-db:
+      postgres:
         condition: service_healthy
+      eureka-server:
+        condition: service_started
     networks:
       - smartcampus-network
-    profiles:
-      - all
 
   timetable-service:
     build:
       context: ./backend/timetable-service
+    image: smartcampus-timetable:latest
     container_name: smartcampus-timetable
-    ports:
-      - "8098:8098"
+    restart: unless-stopped
+    expose:
+      - "8098"
     environment:
       - PORT=8098
       - EUREKA_URL=http://eureka-server:8761/eureka/
-      - DB_HOST=postgres-db
-      - POSTGRES_HOST=postgres-db
-      - DB_USERNAME=${DB_USERNAME:-postgres}
-      - DB_PASSWORD=${DB_PASSWORD:-postgres}
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - DB_USERNAME=${POSTGRES_USER:-collegeuser}
+      - DB_PASSWORD=${POSTGRES_PASSWORD:-collegepass}
     depends_on:
-      postgres-db:
+      postgres:
         condition: service_healthy
+      eureka-server:
+        condition: service_started
     networks:
       - smartcampus-network
-    profiles:
-      - all
 
   fee-service:
     build:
       context: ./backend/fee-service
+    image: smartcampus-fee:latest
     container_name: smartcampus-fee
-    ports:
-      - "8099:8099"
+    restart: unless-stopped
+    expose:
+      - "8099"
     environment:
       - PORT=8099
       - EUREKA_URL=http://eureka-server:8761/eureka/
-      - DB_HOST=postgres-db
-      - POSTGRES_HOST=postgres-db
-      - DB_USERNAME=${DB_USERNAME:-postgres}
-      - DB_PASSWORD=${DB_PASSWORD:-postgres}
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - DB_USERNAME=${POSTGRES_USER:-collegeuser}
+      - DB_PASSWORD=${POSTGRES_PASSWORD:-collegepass}
     depends_on:
-      postgres-db:
+      postgres:
         condition: service_healthy
+      eureka-server:
+        condition: service_started
     networks:
       - smartcampus-network
-    profiles:
-      - all
 
   library-service:
     build:
       context: ./backend/library-service
+    image: smartcampus-library:latest
     container_name: smartcampus-library
-    ports:
-      - "8100:8100"
+    restart: unless-stopped
+    expose:
+      - "8100"
     environment:
       - PORT=8100
       - EUREKA_URL=http://eureka-server:8761/eureka/
-      - DB_HOST=postgres-db
-      - POSTGRES_HOST=postgres-db
-      - DB_USERNAME=${DB_USERNAME:-postgres}
-      - DB_PASSWORD=${DB_PASSWORD:-postgres}
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - DB_USERNAME=${POSTGRES_USER:-collegeuser}
+      - DB_PASSWORD=${POSTGRES_PASSWORD:-collegepass}
     depends_on:
-      postgres-db:
+      postgres:
         condition: service_healthy
+      eureka-server:
+        condition: service_started
     networks:
       - smartcampus-network
-    profiles:
-      - all
 
   hostel-service:
     build:
       context: ./backend/hostel-service
+    image: smartcampus-hostel:latest
     container_name: smartcampus-hostel
-    ports:
-      - "8101:8101"
+    restart: unless-stopped
+    expose:
+      - "8101"
     environment:
       - PORT=8101
       - EUREKA_URL=http://eureka-server:8761/eureka/
-      - DB_HOST=postgres-db
-      - POSTGRES_HOST=postgres-db
-      - DB_USERNAME=${DB_USERNAME:-postgres}
-      - DB_PASSWORD=${DB_PASSWORD:-postgres}
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - DB_USERNAME=${POSTGRES_USER:-collegeuser}
+      - DB_PASSWORD=${POSTGRES_PASSWORD:-collegepass}
     depends_on:
-      postgres-db:
+      postgres:
         condition: service_healthy
+      eureka-server:
+        condition: service_started
     networks:
       - smartcampus-network
-    profiles:
-      - all
 
   transport-service:
     build:
       context: ./backend/transport-service
+    image: smartcampus-transport:latest
     container_name: smartcampus-transport
-    ports:
-      - "8102:8102"
+    restart: unless-stopped
+    expose:
+      - "8102"
     environment:
       - PORT=8102
       - EUREKA_URL=http://eureka-server:8761/eureka/
-      - DB_HOST=postgres-db
-      - POSTGRES_HOST=postgres-db
-      - DB_USERNAME=${DB_USERNAME:-postgres}
-      - DB_PASSWORD=${DB_PASSWORD:-postgres}
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - DB_USERNAME=${POSTGRES_USER:-collegeuser}
+      - DB_PASSWORD=${POSTGRES_PASSWORD:-collegepass}
     depends_on:
-      postgres-db:
+      postgres:
         condition: service_healthy
+      eureka-server:
+        condition: service_started
     networks:
       - smartcampus-network
-    profiles:
-      - all
 
   leave-service:
     build:
       context: ./backend/leave-service
+    image: smartcampus-leave:latest
     container_name: smartcampus-leave
-    ports:
-      - "8103:8103"
+    restart: unless-stopped
+    expose:
+      - "8103"
     environment:
       - PORT=8103
       - EUREKA_URL=http://eureka-server:8761/eureka/
-      - DB_HOST=postgres-db
-      - POSTGRES_HOST=postgres-db
-      - DB_USERNAME=${DB_USERNAME:-postgres}
-      - DB_PASSWORD=${DB_PASSWORD:-postgres}
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - DB_USERNAME=${POSTGRES_USER:-collegeuser}
+      - DB_PASSWORD=${POSTGRES_PASSWORD:-collegepass}
     depends_on:
-      postgres-db:
+      postgres:
         condition: service_healthy
+      eureka-server:
+        condition: service_started
     networks:
       - smartcampus-network
-    profiles:
-      - all
 
   placement-service:
     build:
       context: ./backend/placement-service
+    image: smartcampus-placement:latest
     container_name: smartcampus-placement
-    ports:
-      - "8104:8104"
+    restart: unless-stopped
+    expose:
+      - "8104"
     environment:
       - PORT=8104
       - EUREKA_URL=http://eureka-server:8761/eureka/
-      - DB_HOST=postgres-db
-      - POSTGRES_HOST=postgres-db
-      - DB_USERNAME=${DB_USERNAME:-postgres}
-      - DB_PASSWORD=${DB_PASSWORD:-postgres}
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - DB_USERNAME=${POSTGRES_USER:-collegeuser}
+      - DB_PASSWORD=${POSTGRES_PASSWORD:-collegepass}
     depends_on:
-      postgres-db:
+      postgres:
         condition: service_healthy
+      eureka-server:
+        condition: service_started
     networks:
       - smartcampus-network
-    profiles:
-      - all
 
   event-service:
     build:
       context: ./backend/event-service
+    image: smartcampus-event:latest
     container_name: smartcampus-event
-    ports:
-      - "8105:8105"
+    restart: unless-stopped
+    expose:
+      - "8105"
     environment:
       - PORT=8105
       - EUREKA_URL=http://eureka-server:8761/eureka/
-      - DB_HOST=postgres-db
-      - POSTGRES_HOST=postgres-db
-      - DB_USERNAME=${DB_USERNAME:-postgres}
-      - DB_PASSWORD=${DB_PASSWORD:-postgres}
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - DB_USERNAME=${POSTGRES_USER:-collegeuser}
+      - DB_PASSWORD=${POSTGRES_PASSWORD:-collegepass}
     depends_on:
-      postgres-db:
+      postgres:
         condition: service_healthy
+      eureka-server:
+        condition: service_started
     networks:
       - smartcampus-network
-    profiles:
-      - all
 
   notification-service:
     build:
       context: ./backend/notification-service
+    image: smartcampus-notification:latest
     container_name: smartcampus-notification
-    ports:
-      - "8106:8106"
+    restart: unless-stopped
+    expose:
+      - "8106"
     environment:
       - PORT=8106
       - EUREKA_URL=http://eureka-server:8761/eureka/
-      - DB_HOST=postgres-db
-      - POSTGRES_HOST=postgres-db
-      - DB_USERNAME=${DB_USERNAME:-postgres}
-      - DB_PASSWORD=${DB_PASSWORD:-postgres}
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - DB_USERNAME=${POSTGRES_USER:-collegeuser}
+      - DB_PASSWORD=${POSTGRES_PASSWORD:-collegepass}
     depends_on:
-      postgres-db:
+      postgres:
         condition: service_healthy
+      eureka-server:
+        condition: service_started
     networks:
       - smartcampus-network
-    profiles:
-      - all
 
   document-service:
     build:
       context: ./backend/document-service
+    image: smartcampus-document:latest
     container_name: smartcampus-document
-    ports:
-      - "8107:8107"
+    restart: unless-stopped
+    expose:
+      - "8107"
     environment:
       - PORT=8107
       - EUREKA_URL=http://eureka-server:8761/eureka/
-      - DB_HOST=postgres-db
-      - POSTGRES_HOST=postgres-db
-      - DB_USERNAME=${DB_USERNAME:-postgres}
-      - DB_PASSWORD=${DB_PASSWORD:-postgres}
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - DB_USERNAME=${POSTGRES_USER:-collegeuser}
+      - DB_PASSWORD=${POSTGRES_PASSWORD:-collegepass}
     depends_on:
-      postgres-db:
+      postgres:
         condition: service_healthy
+      eureka-server:
+        condition: service_started
     networks:
       - smartcampus-network
-    profiles:
-      - all
 
   helpdesk-service:
     build:
       context: ./backend/helpdesk-service
+    image: smartcampus-helpdesk:latest
     container_name: smartcampus-helpdesk
-    ports:
-      - "8108:8108"
+    restart: unless-stopped
+    expose:
+      - "8108"
     environment:
       - PORT=8108
       - EUREKA_URL=http://eureka-server:8761/eureka/
-      - DB_HOST=postgres-db
-      - POSTGRES_HOST=postgres-db
-      - DB_USERNAME=${DB_USERNAME:-postgres}
-      - DB_PASSWORD=${DB_PASSWORD:-postgres}
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - DB_USERNAME=${POSTGRES_USER:-collegeuser}
+      - DB_PASSWORD=${POSTGRES_PASSWORD:-collegepass}
     depends_on:
-      postgres-db:
+      postgres:
         condition: service_healthy
+      eureka-server:
+        condition: service_started
     networks:
       - smartcampus-network
-    profiles:
-      - all
 
   report-service:
     build:
       context: ./backend/report-service
+    image: smartcampus-report:latest
     container_name: smartcampus-report
-    ports:
-      - "8109:8109"
+    restart: unless-stopped
+    expose:
+      - "8109"
     environment:
       - PORT=8109
       - EUREKA_URL=http://eureka-server:8761/eureka/
-      - DB_HOST=postgres-db
-      - POSTGRES_HOST=postgres-db
-      - DB_USERNAME=${DB_USERNAME:-postgres}
-      - DB_PASSWORD=${DB_PASSWORD:-postgres}
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - DB_USERNAME=${POSTGRES_USER:-collegeuser}
+      - DB_PASSWORD=${POSTGRES_PASSWORD:-collegepass}
     depends_on:
-      postgres-db:
+      postgres:
         condition: service_healthy
+      eureka-server:
+        condition: service_started
     networks:
       - smartcampus-network
-    profiles:
-      - all
-
-  # =====================================================
-  # 7. OPTIONAL TOOLS (pgAdmin 4 Web GUI)
-  # =====================================================
-  pgadmin:
-    image: dpage/pgadmin4:latest
-    container_name: smartcampus-pgadmin
-    restart: unless-stopped
-    environment:
-      PGADMIN_DEFAULT_EMAIL: admin@smartcampus.edu
-      PGADMIN_DEFAULT_PASSWORD: admin
-    ports:
-      - "5050:80"
-    depends_on:
-      - postgres-db
-    networks:
-      - smartcampus-network
-    profiles:
-      - tools
 
 volumes:
   postgres_data:
@@ -538,5 +604,5 @@ volumes:
 
 networks:
   smartcampus-network:
-    name: smartcampus_network
+    name: smartcampus-network
     driver: bridge
