@@ -1,110 +1,156 @@
-# SmartCampus – Complete Execution & Startup Guide
+# SmartCampus – Production Deployment & Execution Guide
 
-This document outlines how to run the entire **SmartCampus** application (Multi-Tenant PostgreSQL, Spring Boot microservices, and React/Vite frontend).
-
----
-
-## 1. Quickest Method: Docker (Recommended)
-
-With Docker, you do **not** need to install or configure PostgreSQL, pgAdmin, Java, or Maven manually. All services and databases are containerized and auto-initialized.
-
-### Launch with One Command
-
-Open a PowerShell terminal in the project root:
-
-```powershell
-# Option 1: Core Stack (PostgreSQL + Eureka + API Gateway + Auth + College + Frontend)
-.\docker-start.ps1 -Core
-
-# Option 2: Full Campus Stack (PostgreSQL + All 22 Microservices + Frontend)
-.\docker-start.ps1 -All
-
-# Option 3: Core Stack + pgAdmin 4 Web GUI
-.\docker-start.ps1 -Core -Tools
-```
-
-Or run Docker Compose directly:
-```powershell
-# Core Stack
-docker compose --profile core up -d
-
-# Full Stack
-docker compose --profile all up -d
-```
-
-### Stop Containers
-```powershell
-.\docker-stop.ps1
-# Or: docker compose --profile all --profile core --profile tools down
-```
-> [!NOTE]
-> All database data is preserved safely in the Docker named volume `smartcampus_postgres_data`.
+This document outlines how to deploy and operate the entire **SmartCampus** distributed system (PostgreSQL 16, 22 Spring Boot microservices, Eureka discovery, API Gateway, and React 19 / Nginx frontend) completely through Docker Compose on an Azure Linux VM or local workstation.
 
 ---
 
-## 2. Alternative Method: Local PowerShell Scripts
+## 1. Quick Start: Production Docker Deployment (Azure Linux VM)
 
-If you wish to run without Docker, using your locally installed JDK 21, Maven, Node.js, and local PostgreSQL 18:
+With Docker Compose, all 24 containers run within a private bridge network (`smartcampus-network`). PostgreSQL automatically initializes all 20 isolated microservice databases, Eureka coordinates discovery, API Gateway handles intelligent routing, and Nginx serves the React SPA while reverse-proxying `/api/*` requests.
 
-### Step 1: Initialize Local Database
-Ensure PostgreSQL is active on port `5432` with username `postgres`.  
-Execute the script [`backend/docker/init-databases.sql`](backend/docker/init-databases.sql) once in pgAdmin or via `psql`.
+### Prerequisites on Azure VM
+- Ubuntu 22.04 / Debian 12 / RHEL 9 VM
+- Docker Engine >= 24.0 and Docker Compose >= 2.20
+- Git
 
-### Step 2: Start Backend Microservices
-```powershell
-# Option 1: Start Core Infrastructure (Eureka + Gateway + Auth + College)
-.\start-backend.ps1 -Core
+### Step-by-Step Deployment Commands
 
-# Option 2: Start ALL 22 microservices
-.\start-backend.ps1 -All
-```
+```bash
+# 1. Clone repository and checkout the extra branch
+git clone -b extra https://github.com/mahes359/smartcampus.git
+cd smartcampus
 
-### Step 3: Start Frontend Web Application
-In a separate terminal:
-```powershell
-.\start-frontend.ps1
-```
+# 2. Setup environment variables from template
+cp .env.example .env
 
-### Step 4: Stop Local Services
-```powershell
-.\stop-all.ps1
+# (Optional) Customize POSTGRES_PASSWORD or JWT_SECRET in .env if desired:
+# nano .env
+
+# 3. Build all container images (Frontend + 22 Microservices)
+docker compose build
+
+# 4. Start the entire SmartCampus stack in detached mode
+docker compose up -d
+
+# 5. Verify container status and health
+docker compose ps
 ```
 
 ---
 
-## 3. Web Access & Port Reference Map
+## 2. Essential Operations & Commands
 
-| Component / Microservice | Local Port | Key URL / Endpoint |
-| :--- | :--- | :--- |
-| **Frontend Web App** | `5173` | [http://localhost:5173/](http://localhost:5173/) |
-| **API Gateway** | `8080` | [http://localhost:8080/](http://localhost:8080/) |
-| **Eureka Service Registry** | `8761` | [http://localhost:8761/](http://localhost:8761/) |
-| **PostgreSQL Database** | `5432` | `localhost:5432` (Auto-initialized) |
-| **pgAdmin 4 (Optional)** | `5050` | [http://localhost:5050/](http://localhost:5050/) |
-| **auth-service** | `8090` | `/api/auth/status` |
-| **college-service** | `8091` | `/api/colleges` |
-| **student-service** | `8092` | `/api/students` |
-| **faculty-service** | `8093` | `/api/faculty` |
-| **course-service** | `8094` | `/api/courses` |
-| **enrollment-service** | `8095` | `/api/enrollments` |
-| **attendance-service** | `8096` | `/api/attendance` |
-| **exam-service** | `8097` | `/api/exams` |
-| **timetable-service** | `8098` | `/api/timetable` |
-| **fee-service** | `8099` | `/api/fees` |
-| **library-service** | `8100` | `/api/library` |
-| **hostel-service** | `8101` | `/api/hostel` |
-| **transport-service** | `8102` | `/api/transport` |
-| **leave-service** | `8103` | `/api/leaves` |
-| **placement-service** | `8104` | `/api/placements` |
-| **event-service** | `8105` | `/api/events` |
-| **notification-service** | `8106` | `/api/notifications` |
-| **document-service** | `8107` | `/api/documents` |
-| **helpdesk-service** | `8108` | `/api/helpdesk` |
-| **report-service** | `8109` | `/api/reports` |
+### View Logs
+```bash
+# Stream logs for all containers
+docker compose logs -f
+
+# View logs for a specific service
+docker compose logs -f api-gateway
+docker compose logs -f eureka-server
+docker compose logs -f postgres
+docker compose logs -f frontend
+```
+
+### Stop the System
+```bash
+# Stop all containers (data in PostgreSQL volume is safely preserved)
+docker compose down
+```
+
+### Rebuild After Code Updates
+```bash
+# Pull latest changes from git
+git pull origin extra
+
+# Rebuild and restart updated services with zero unnecessary downtime
+docker compose up -d --build
+```
+
+### Reset PostgreSQL Volumes (Fresh Re-initialization Only)
+> [!CAUTION]
+> This command permanently destroys existing database data and causes PostgreSQL initialization scripts to run from scratch. Only use this when intentionally resetting the system.
+
+```bash
+# Stop containers and wipe the database named volume
+docker compose down -v
+
+# Start with a fresh volume and re-run init-databases.sql
+docker compose up -d
+```
 
 ---
 
-## 4. Default Login Credentials
+## 3. Architecture & Network Topology
+
+```
+                   Internet / Web Browser
+                             |
+                             v  Port 80 (and 5173 for dev compatibility)
+                      +--------------+
+                      | Frontend     |  (React 19 + Nginx)
+                      +--------------+
+                             |
+                             |  Internal Proxy: /api/* -> http://api-gateway:8080
+                             v
+                      +--------------+
+                      | API Gateway  |  Port 8080
+                      +--------------+
+                             |
+             +---------------+---------------+
+             |                               |
+             v                               v
+      +--------------+               +--------------------------------------+
+      | Eureka       |  Port 8761    | 20 Microservices (Ports 8090 - 8109) |
+      | Registry     |               | (Internal network only - not public) |
+      +--------------+               +--------------------------------------+
+                                                     |
+                                                     v
+                                             +---------------+
+                                             | PostgreSQL 16 |  Port 5432
+                                             | (Multi-tenant)|  (Internal only)
+                                             +---------------+
+```
+
+---
+
+## 4. Port & External Access Reference
+
+| Component / Service | Exposed Host Port | Publicly Accessible? | Description & URL |
+| :--- | :--- | :--- | :--- |
+| **Frontend (Nginx)** | `80`, `5173` | **Yes** | Web application UI (`http://<VM_IP>/`) |
+| **API Gateway** | `8080` | **Yes (Optional)** | Central API router & health check (`http://<VM_IP>:8080/actuator/health`) |
+| **Eureka Server** | `8761` | **Yes (Admin)** | Discovery Dashboard (`http://<VM_IP>:8761/`) |
+| **PostgreSQL** | `5432` | **No** (Internal) | Isolated to `smartcampus-network` |
+| **Microservices (20)**| `8090 - 8109` | **No** (Internal) | Internal Docker network communication only via `lb://<SERVICE_NAME>` |
+
+---
+
+## 5. Verification & Health Check Endpoints
+
+Once `docker compose ps` shows services healthy, you can test endpoints from the host:
+
+```bash
+# 1. Frontend Web App
+curl -I http://localhost/
+
+# 2. API Gateway Actuator Health
+curl http://localhost:8080/actuator/health
+
+# 3. Eureka Registered Services
+curl -H "Accept: application/json" http://localhost:8761/eureka/apps
+
+# 4. Proxy through Frontend (Port 80) -> Gateway -> Microservice
+curl http://localhost/api/colleges/status
+curl http://localhost/api/students/status
+curl http://localhost/api/courses/status
+curl http://localhost/api/auth/status
+curl http://localhost/api/reports/summary
+```
+
+---
+
+## 6. Default Login Credentials
 
 | Role | Email | Password |
 | :--- | :--- | :--- |

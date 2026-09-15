@@ -10,14 +10,14 @@ services:
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-collegeuser}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-collegepass}
-      POSTGRES_DB: ${POSTGRES_DB:-college_auth}
+      POSTGRES_DB: ${POSTGRES_DB:-postgres}
     expose:
       - "5432"
     volumes:
       - ./backend/docker/init-databases.sql:/docker-entrypoint-initdb.d/init-databases.sql
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-collegeuser} -d college_auth"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-collegeuser} -d ${POSTGRES_DB:-postgres}"]
       interval: 5s
       timeout: 5s
       retries: 10

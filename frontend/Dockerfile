@@ -1,5 +1,5 @@
-# Stage 1: Build React/Vite Application
-FROM node:20-alpine AS build
+# Stage 1: Build React/Vite Application using Node 24
+FROM node:24-alpine AS build
 
 WORKDIR /app
 
@@ -9,7 +9,7 @@ RUN npm install
 COPY . .
 RUN npm run build
 
-# Stage 2: Lightweight Nginx Server
+# Stage 2: Production Nginx Server
 FROM nginx:alpine
 
 COPY --from=build /app/dist /usr/share/nginx/html
