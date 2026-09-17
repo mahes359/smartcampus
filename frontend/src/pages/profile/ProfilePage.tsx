@@ -5,26 +5,27 @@ import { Avatar } from '../../components/ui/Avatar';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
 import { useAuth } from '../../context/AuthContext';
-import { ROLE_LABELS, type UserRole } from '../../constants/roles';
-import { Mail, Building, Moon, Sun, CheckCircle2 } from 'lucide-react';
+import { ROLE_LABELS } from '../../constants/roles';
+import { Mail, Building, Moon, Sun, ShieldCheck, User } from 'lucide-react';
 
 export const ProfilePage: React.FC = () => {
-  const { user, role, activeCollegeId, isDarkMode, toggleDarkMode, switchRole } = useAuth();
+  const { user, role, activeCollegeId, isDarkMode, toggleDarkMode } = useAuth();
 
   return (
     <div className="max-w-4xl">
       <PageHeader
         title="User Profile & Account Preferences"
-        description="Institutional identity credentials, security settings & role access configuration"
+        description="Institutional identity credentials, security settings & access configuration"
       />
 
+      {/* Identity Card */}
       <Card className="mb-6">
         <div className="flex flex-col sm:flex-row sm:items-center gap-5">
           <Avatar name={user?.name || 'User'} size="xl" />
           <div className="space-y-1">
             <div className="flex items-center gap-2.5">
               <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">{user?.name}</h2>
-              <Badge variant="primary" size="sm">{ROLE_LABELS[role]}</Badge>
+              {role && <Badge variant="primary" size="sm">{ROLE_LABELS[role]}</Badge>}
             </div>
             <p className="text-xs text-slate-500 flex items-center gap-1.5"><Mail className="w-3.5 h-3.5" />{user?.email}</p>
             <p className="text-xs text-slate-500 flex items-center gap-1.5"><Building className="w-3.5 h-3.5" />Institution Tenant ID: #{activeCollegeId}</p>
@@ -33,31 +34,31 @@ export const ProfilePage: React.FC = () => {
       </Card>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card header="Access Profile & Role Delegation">
-          <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">
-            Test and preview different ERP authorization perspectives by switching your active role profile.
-          </p>
-          <div className="space-y-2">
-            {Object.keys(ROLE_LABELS).map((r) => {
-              const isCurrent = role === r;
-              return (
-                <button
-                  key={r}
-                  onClick={() => switchRole(r as UserRole)}
-                  className={`w-full p-2.5 rounded-lg border text-left text-xs flex items-center justify-between transition-all cursor-pointer ${
-                    isCurrent
-                      ? 'border-blue-500 bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 font-semibold'
-                      : 'border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300'
-                  }`}
-                >
-                  <span>{ROLE_LABELS[r as UserRole]}</span>
-                  {isCurrent && <CheckCircle2 className="w-4 h-4 text-blue-600 dark:text-blue-400" />}
-                </button>
-              );
-            })}
+        {/* Role & Access Info (read-only) */}
+        <Card header="Access Role & Permissions">
+          <div className="space-y-3 text-xs">
+            <p className="text-slate-500 dark:text-slate-400">
+              Your access level is determined by your institutional account. Contact your administrator to request a role change.
+            </p>
+            <div className="flex items-center gap-3 p-3 bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-xl">
+              <ShieldCheck className="w-5 h-5 text-blue-600 dark:text-blue-400 shrink-0" />
+              <div>
+                <p className="font-semibold text-blue-800 dark:text-blue-200">{role ? ROLE_LABELS[role] : 'Unassigned'}</p>
+                <p className="text-[11px] text-blue-600 dark:text-blue-400">Active session role — server-verified</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-slate-200 dark:border-slate-700">
+              <User className="w-5 h-5 text-slate-500 shrink-0" />
+              <div>
+                <p className="font-semibold text-slate-800 dark:text-slate-200">User ID: {user?.id}</p>
+                <p className="text-[11px] text-slate-500">Internal identifier for this account</p>
+              </div>
+            </div>
           </div>
         </Card>
 
+        {/* Appearance & Security */}
         <Card header="Application Preferences & Appearance">
           <div className="space-y-4 text-xs">
             <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800/40 rounded-xl">

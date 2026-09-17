@@ -7,7 +7,7 @@ import { eventService } from '../../services/eventService';
 import { transportService } from '../../services/transportService';
 import { helpdeskService } from '../../services/helpdeskService';
 import type { College, NotificationItem, CampusEvent, TransportRoute } from '../../types';
-import { ROLE_LABELS, type UserRole } from '../../constants/roles';
+
 import {
   GraduationCap,
   Mail,
@@ -46,9 +46,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({ initialOpenLogin = fal
 
   // Login Modal State
   const [isLoginOpen, setIsLoginOpen] = useState(initialOpenLogin);
-  const [email, setEmail] = useState('student@smartcampus.edu');
-  const [password, setPassword] = useState('password123');
-  const [selectedRole, setSelectedRole] = useState<UserRole>('STUDENT');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [redirectPath, setRedirectPath] = useState<string | null>(null);
   const [colleges, setColleges] = useState<College[]>([]);
   const [selectedCollegeId, setSelectedCollegeId] = useState<number>(1);
   const [showPassword, setShowPassword] = useState(false);
@@ -117,13 +117,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({ initialOpenLogin = fal
       .catch(() => setRoutes([]));
   }, []);
 
-  const handleQuickRoleSelect = (role: UserRole, defaultEmail: string) => {
-    setSelectedRole(role);
-    setEmail(defaultEmail);
-    setPassword('password123');
-    setLoginError(null);
-  };
-
   const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoginError(null);
@@ -132,13 +125,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({ initialOpenLogin = fal
       await login({
         email,
         password,
-        role: selectedRole,
-        collegeId: selectedCollegeId,
       });
       setIsLoginOpen(false);
-      navigate('/dashboard');
+      navigate(redirectPath || '/dashboard');
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Invalid credentials. Please verify your details.';
+      const msg = err instanceof Error ? err.message : 'Invalid email or password';
       setLoginError(msg);
     } finally {
       setIsSubmitting(false);
@@ -170,12 +161,12 @@ export const LandingPage: React.FC<LandingPageProps> = ({ initialOpenLogin = fal
     }
   };
 
-  // Safe navigation handler: if user is logged in, navigate to target route; if not, open login modal
-  const handleFeatureClick = (path: string, suggestedRole: UserRole = 'STUDENT', defaultEmail = 'student@smartcampus.edu') => {
+  // Safe navigation handler: if user is logged in, navigate to target route; if not, prompt login and remember destination
+  const handleFeatureClick = (path: string) => {
     if (isAuthenticated) {
       navigate(path);
     } else {
-      handleQuickRoleSelect(suggestedRole, defaultEmail);
+      setRedirectPath(path);
       setIsLoginOpen(true);
     }
   };
@@ -216,31 +207,31 @@ export const LandingPage: React.FC<LandingPageProps> = ({ initialOpenLogin = fal
             </Link>
             <span className="text-slate-600">|</span>
             <button
-              onClick={() => handleFeatureClick('/library', 'LIBRARIAN', 'library@smartcampus.edu')}
+              onClick={() => handleFeatureClick('/library')}
               className="hover:text-cyan-400 transition-colors cursor-pointer"
             >
               Library Catalog
             </button>
             <button
-              onClick={() => handleFeatureClick('/transport', 'COLLEGE_ADMIN', 'admin@smartcampus.edu')}
+              onClick={() => handleFeatureClick('/transport')}
               className="hover:text-cyan-400 transition-colors cursor-pointer"
             >
               Campus Transport
             </button>
             <button
-              onClick={() => handleFeatureClick('/events', 'COLLEGE_ADMIN', 'admin@smartcampus.edu')}
+              onClick={() => handleFeatureClick('/events')}
               className="hover:text-cyan-400 transition-colors cursor-pointer"
             >
               Events
             </button>
             <button
-              onClick={() => handleFeatureClick('/placement', 'COLLEGE_ADMIN', 'admin@smartcampus.edu')}
+              onClick={() => handleFeatureClick('/placement')}
               className="hover:text-cyan-400 transition-colors cursor-pointer"
             >
               Placements
             </button>
             <button
-              onClick={() => handleFeatureClick('/helpdesk', 'STUDENT', 'student@smartcampus.edu')}
+              onClick={() => handleFeatureClick('/helpdesk')}
               className="hover:text-cyan-400 transition-colors cursor-pointer"
             >
               Helpdesk Support
@@ -328,7 +319,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ initialOpenLogin = fal
           <div className="flex flex-wrap items-center justify-center sm:justify-end gap-3 sm:gap-4">
             {/* Real Admissions / Enrollment Card */}
             <div
-              onClick={() => handleFeatureClick('/courses', 'STUDENT', 'student@smartcampus.edu')}
+              onClick={() => handleFeatureClick('/courses')}
               className="bg-[#0b2470] text-white p-2.5 sm:p-3 rounded-md shadow-md border-l-4 border-amber-400 max-w-xs text-xs cursor-pointer hover:bg-blue-900 transition-colors"
             >
               <div className="font-bold underline text-white hover:text-amber-300 block mb-1">
@@ -378,35 +369,35 @@ export const LandingPage: React.FC<LandingPageProps> = ({ initialOpenLogin = fal
               {activeMenu === 'academics' && (
                 <div className="absolute left-0 top-full w-56 bg-white border border-slate-200 shadow-xl rounded-b-md py-2 z-50 text-xs normal-case font-medium text-slate-700">
                   <button
-                    onClick={() => handleFeatureClick('/courses', 'STUDENT', 'student@smartcampus.edu')}
+                    onClick={() => handleFeatureClick('/courses')}
                     className="w-full text-left px-4 py-1.5 hover:bg-blue-50 hover:text-blue-700 flex items-center gap-2 cursor-pointer"
                   >
                     <BookOpen className="w-3.5 h-3.5 text-blue-600" />
                     <span>Course Catalog &amp; Syllabus</span>
                   </button>
                   <button
-                    onClick={() => handleFeatureClick('/timetable', 'STUDENT', 'student@smartcampus.edu')}
+                    onClick={() => handleFeatureClick('/timetable')}
                     className="w-full text-left px-4 py-1.5 hover:bg-blue-50 hover:text-blue-700 flex items-center gap-2 cursor-pointer"
                   >
                     <Clock className="w-3.5 h-3.5 text-indigo-600" />
                     <span>Class Timetable</span>
                   </button>
                   <button
-                    onClick={() => handleFeatureClick('/attendance', 'FACULTY', 'faculty@smartcampus.edu')}
+                    onClick={() => handleFeatureClick('/attendance')}
                     className="w-full text-left px-4 py-1.5 hover:bg-blue-50 hover:text-blue-700 flex items-center gap-2 cursor-pointer"
                   >
                     <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
                     <span>Attendance Tracking</span>
                   </button>
                   <button
-                    onClick={() => handleFeatureClick('/exams', 'EXAM_OFFICER', 'exams@smartcampus.edu')}
+                    onClick={() => handleFeatureClick('/exams')}
                     className="w-full text-left px-4 py-1.5 hover:bg-blue-50 hover:text-blue-700 flex items-center gap-2 cursor-pointer"
                   >
                     <FileText className="w-3.5 h-3.5 text-rose-600" />
                     <span>Exams &amp; Results</span>
                   </button>
                   <button
-                    onClick={() => handleFeatureClick('/enrollment', 'COLLEGE_ADMIN', 'admin@smartcampus.edu')}
+                    onClick={() => handleFeatureClick('/enrollment')}
                     className="w-full text-left px-4 py-1.5 hover:bg-blue-50 hover:text-blue-700 flex items-center gap-2 cursor-pointer"
                   >
                     <Layers className="w-3.5 h-3.5 text-amber-600" />
@@ -428,28 +419,28 @@ export const LandingPage: React.FC<LandingPageProps> = ({ initialOpenLogin = fal
               {activeMenu === 'facilities' && (
                 <div className="absolute left-0 top-full w-56 bg-white border border-slate-200 shadow-xl rounded-b-md py-2 z-50 text-xs normal-case font-medium text-slate-700">
                   <button
-                    onClick={() => handleFeatureClick('/library', 'LIBRARIAN', 'library@smartcampus.edu')}
+                    onClick={() => handleFeatureClick('/library')}
                     className="w-full text-left px-4 py-1.5 hover:bg-blue-50 hover:text-blue-700 flex items-center gap-2 cursor-pointer"
                   >
                     <BookOpen className="w-3.5 h-3.5 text-amber-600" />
                     <span>Digital Library (OPAC)</span>
                   </button>
                   <button
-                    onClick={() => handleFeatureClick('/hostel', 'COLLEGE_ADMIN', 'admin@smartcampus.edu')}
+                    onClick={() => handleFeatureClick('/hostel')}
                     className="w-full text-left px-4 py-1.5 hover:bg-blue-50 hover:text-blue-700 flex items-center gap-2 cursor-pointer"
                   >
                     <HomeIcon className="w-3.5 h-3.5 text-purple-600" />
                     <span>Hostel Allocation &amp; Rooms</span>
                   </button>
                   <button
-                    onClick={() => handleFeatureClick('/transport', 'COLLEGE_ADMIN', 'admin@smartcampus.edu')}
+                    onClick={() => handleFeatureClick('/transport')}
                     className="w-full text-left px-4 py-1.5 hover:bg-blue-50 hover:text-blue-700 flex items-center gap-2 cursor-pointer"
                   >
                     <Bus className="w-3.5 h-3.5 text-emerald-600" />
                     <span>Campus Transport Fleet</span>
                   </button>
                   <button
-                    onClick={() => handleFeatureClick('/events', 'COLLEGE_ADMIN', 'admin@smartcampus.edu')}
+                    onClick={() => handleFeatureClick('/events')}
                     className="w-full text-left px-4 py-1.5 hover:bg-blue-50 hover:text-blue-700 flex items-center gap-2 cursor-pointer"
                   >
                     <Calendar className="w-3.5 h-3.5 text-blue-600" />
@@ -471,28 +462,28 @@ export const LandingPage: React.FC<LandingPageProps> = ({ initialOpenLogin = fal
               {activeMenu === 'services' && (
                 <div className="absolute left-0 top-full w-56 bg-white border border-slate-200 shadow-xl rounded-b-md py-2 z-50 text-xs normal-case font-medium text-slate-700">
                   <button
-                    onClick={() => handleFeatureClick('/leave', 'STUDENT', 'student@smartcampus.edu')}
+                    onClick={() => handleFeatureClick('/leave')}
                     className="w-full text-left px-4 py-1.5 hover:bg-blue-50 hover:text-blue-700 flex items-center gap-2 cursor-pointer"
                   >
                     <Clock className="w-3.5 h-3.5 text-teal-600" />
                     <span>Leave Applications</span>
                   </button>
                   <button
-                    onClick={() => handleFeatureClick('/documents', 'STUDENT', 'student@smartcampus.edu')}
+                    onClick={() => handleFeatureClick('/documents')}
                     className="w-full text-left px-4 py-1.5 hover:bg-blue-50 hover:text-blue-700 flex items-center gap-2 cursor-pointer"
                   >
                     <FolderLock className="w-3.5 h-3.5 text-cyan-600" />
                     <span>Document Vault</span>
                   </button>
                   <button
-                    onClick={() => handleFeatureClick('/helpdesk', 'STUDENT', 'student@smartcampus.edu')}
+                    onClick={() => handleFeatureClick('/helpdesk')}
                     className="w-full text-left px-4 py-1.5 hover:bg-blue-50 hover:text-blue-700 flex items-center gap-2 cursor-pointer"
                   >
                     <HelpCircle className="w-3.5 h-3.5 text-rose-600" />
                     <span>Helpdesk &amp; Grievances</span>
                   </button>
                   <button
-                    onClick={() => handleFeatureClick('/placement', 'STUDENT', 'student@smartcampus.edu')}
+                    onClick={() => handleFeatureClick('/placement')}
                     className="w-full text-left px-4 py-1.5 hover:bg-blue-50 hover:text-blue-700 flex items-center gap-2 cursor-pointer"
                   >
                     <Briefcase className="w-3.5 h-3.5 text-indigo-600" />
@@ -514,21 +505,21 @@ export const LandingPage: React.FC<LandingPageProps> = ({ initialOpenLogin = fal
               {activeMenu === 'institutions' && (
                 <div className="absolute left-0 top-full w-56 bg-white border border-slate-200 shadow-xl rounded-b-md py-2 z-50 text-xs normal-case font-medium text-slate-700">
                   <button
-                    onClick={() => handleFeatureClick('/colleges', 'SUPER_ADMIN', 'superadmin@smartcampus.edu')}
+                    onClick={() => handleFeatureClick('/colleges')}
                     className="w-full text-left px-4 py-1.5 hover:bg-blue-50 hover:text-blue-700 flex items-center gap-2 cursor-pointer"
                   >
                     <Building className="w-3.5 h-3.5 text-blue-600" />
                     <span>Colleges &amp; Campuses</span>
                   </button>
                   <button
-                    onClick={() => handleFeatureClick('/faculty', 'COLLEGE_ADMIN', 'admin@smartcampus.edu')}
+                    onClick={() => handleFeatureClick('/faculty')}
                     className="w-full text-left px-4 py-1.5 hover:bg-blue-50 hover:text-blue-700 flex items-center gap-2 cursor-pointer"
                   >
                     <Users className="w-3.5 h-3.5 text-indigo-600" />
                     <span>Faculty &amp; Staff Directory</span>
                   </button>
                   <button
-                    onClick={() => handleFeatureClick('/students', 'COLLEGE_ADMIN', 'admin@smartcampus.edu')}
+                    onClick={() => handleFeatureClick('/students')}
                     className="w-full text-left px-4 py-1.5 hover:bg-blue-50 hover:text-blue-700 flex items-center gap-2 cursor-pointer"
                   >
                     <GraduationCap className="w-3.5 h-3.5 text-purple-600" />
@@ -541,7 +532,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ initialOpenLogin = fal
             {/* FINANCE & FEES */}
             <li className="py-3 hover:text-blue-700 transition-colors">
               <button
-                onClick={() => handleFeatureClick('/fees', 'ACCOUNTANT', 'accounts@smartcampus.edu')}
+                onClick={() => handleFeatureClick('/fees')}
                 className="cursor-pointer"
               >
                 FINANCE &amp; FEES
@@ -551,7 +542,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ initialOpenLogin = fal
             {/* PLACEMENT */}
             <li className="py-3 hover:text-blue-700 transition-colors">
               <button
-                onClick={() => handleFeatureClick('/placement', 'STUDENT', 'student@smartcampus.edu')}
+                onClick={() => handleFeatureClick('/placement')}
                 className="cursor-pointer"
               >
                 PLACEMENTS
@@ -561,7 +552,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ initialOpenLogin = fal
             {/* NOTIFICATIONS */}
             <li className="py-3 hover:text-blue-700 transition-colors">
               <button
-                onClick={() => handleFeatureClick('/notifications', 'STUDENT', 'student@smartcampus.edu')}
+                onClick={() => handleFeatureClick('/notifications')}
                 className="cursor-pointer"
               >
                 NOTIFICATIONS
@@ -571,7 +562,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ initialOpenLogin = fal
             {/* REPORTS & ANALYTICS */}
             <li className="py-3 hover:text-blue-700 transition-colors">
               <button
-                onClick={() => handleFeatureClick('/reports', 'COLLEGE_ADMIN', 'admin@smartcampus.edu')}
+                onClick={() => handleFeatureClick('/reports')}
                 className="cursor-pointer"
               >
                 REPORTS &amp; ANALYTICS
@@ -611,7 +602,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ initialOpenLogin = fal
               notifications.map((notif, index) => (
                 <React.Fragment key={notif.id || index}>
                   <button
-                    onClick={() => handleFeatureClick('/notifications', 'STUDENT', 'student@smartcampus.edu')}
+                    onClick={() => handleFeatureClick('/notifications')}
                     className="hover:underline flex items-center gap-1 cursor-pointer"
                   >
                     <span className="text-slate-700 font-bold">[{notif.type || 'Circular'}]:</span>
@@ -623,7 +614,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ initialOpenLogin = fal
             ) : (
               <>
                 <button
-                  onClick={() => handleFeatureClick('/events', 'STUDENT', 'student@smartcampus.edu')}
+                  onClick={() => handleFeatureClick('/events')}
                   className="hover:underline flex items-center gap-1 cursor-pointer"
                 >
                   <span className="text-slate-700 font-bold">Examinations :</span>
@@ -631,7 +622,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ initialOpenLogin = fal
                 </button>
                 <span className="text-amber-500 font-bold">★</span>
                 <button
-                  onClick={() => handleFeatureClick('/placement', 'STUDENT', 'student@smartcampus.edu')}
+                  onClick={() => handleFeatureClick('/placement')}
                   className="hover:underline flex items-center gap-1 cursor-pointer"
                 >
                   <span className="text-slate-700 font-bold">Placements :</span>
@@ -639,7 +630,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ initialOpenLogin = fal
                 </button>
                 <span className="text-amber-500 font-bold">★</span>
                 <button
-                  onClick={() => handleFeatureClick('/helpdesk', 'STUDENT', 'student@smartcampus.edu')}
+                  onClick={() => handleFeatureClick('/helpdesk')}
                   className="hover:underline flex items-center gap-1 cursor-pointer"
                 >
                   <span className="text-slate-700 font-bold">Support :</span>
@@ -652,7 +643,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ initialOpenLogin = fal
               events.map((evt) => (
                 <React.Fragment key={evt.id}>
                   <button
-                    onClick={() => handleFeatureClick('/events', 'STUDENT', 'student@smartcampus.edu')}
+                    onClick={() => handleFeatureClick('/events')}
                     className="hover:underline flex items-center gap-1 cursor-pointer"
                   >
                     <span className="text-slate-700 font-bold">[Event]:</span>
@@ -701,7 +692,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ initialOpenLogin = fal
                 <span>Access ERP Portal</span>
               </button>
               <button
-                onClick={() => handleFeatureClick('/courses', 'STUDENT', 'student@smartcampus.edu')}
+                onClick={() => handleFeatureClick('/courses')}
                 className="px-5 py-2.5 bg-white text-blue-900 border border-blue-200 hover:bg-blue-50 font-bold text-xs rounded-xl shadow-xs transition-all flex items-center gap-2 cursor-pointer"
               >
                 <BookOpen className="w-4 h-4" />
@@ -715,7 +706,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ initialOpenLogin = fal
         <div className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-10 flex flex-col gap-1.5">
           <div className="bg-linear-to-b from-blue-900 via-indigo-900 to-slate-900 text-white rounded-xl shadow-2xl p-2.5 sm:p-3 text-xs font-bold space-y-2.5 backdrop-blur-xs border border-white/20">
             <button
-              onClick={() => handleFeatureClick('/students', 'STUDENT', 'student@smartcampus.edu')}
+              onClick={() => handleFeatureClick('/students')}
               className="flex items-center gap-2 hover:text-cyan-300 transition-colors cursor-pointer w-full text-left"
             >
               <GraduationCap className="w-4 h-4 text-cyan-400" />
@@ -723,7 +714,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ initialOpenLogin = fal
             </button>
             <div className="h-px bg-white/20" />
             <button
-              onClick={() => handleFeatureClick('/faculty', 'FACULTY', 'faculty@smartcampus.edu')}
+              onClick={() => handleFeatureClick('/faculty')}
               className="flex items-center gap-2 hover:text-cyan-300 transition-colors cursor-pointer w-full text-left"
             >
               <Users className="w-4 h-4 text-cyan-400" />
@@ -731,7 +722,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ initialOpenLogin = fal
             </button>
             <div className="h-px bg-white/20" />
             <button
-              onClick={() => handleFeatureClick('/courses', 'STUDENT', 'student@smartcampus.edu')}
+              onClick={() => handleFeatureClick('/courses')}
               className="flex items-center gap-2 hover:text-cyan-300 transition-colors cursor-pointer w-full text-left"
             >
               <BookOpen className="w-4 h-4 text-cyan-400" />
@@ -756,27 +747,16 @@ export const LandingPage: React.FC<LandingPageProps> = ({ initialOpenLogin = fal
           </div>
         </div>
 
-        {/* Right Quick Role Direct Sign-In Badges */}
+        {/* Portal Access Button */}
         <div className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 z-10 flex flex-col gap-2">
-          {[
-            { role: 'STUDENT' as UserRole, label: 'Student', email: 'student@smartcampus.edu', bg: 'bg-blue-600' },
-            { role: 'FACULTY' as UserRole, label: 'Faculty', email: 'faculty@smartcampus.edu', bg: 'bg-indigo-600' },
-            { role: 'COLLEGE_ADMIN' as UserRole, label: 'Admin', email: 'admin@smartcampus.edu', bg: 'bg-purple-600' },
-            { role: 'SUPER_ADMIN' as UserRole, label: 'Super', email: 'superadmin@smartcampus.edu', bg: 'bg-slate-800' },
-          ].map((persona) => (
-            <button
-              key={persona.role}
-              onClick={() => {
-                handleQuickRoleSelect(persona.role, persona.email);
-                setIsLoginOpen(true);
-              }}
-              className={`px-2.5 py-1.5 rounded-lg ${persona.bg} hover:brightness-110 text-white flex items-center gap-1.5 shadow-lg transition-transform hover:scale-105 cursor-pointer text-xs font-bold`}
-              title={`Sign in as ${persona.label}`}
-            >
-              <Lock className="w-3 h-3" />
-              <span className="hidden sm:inline">{persona.label}</span>
-            </button>
-          ))}
+          <button
+            onClick={() => setIsLoginOpen(true)}
+            className="px-3 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white flex items-center gap-2 shadow-lg transition-transform hover:scale-105 cursor-pointer text-xs font-bold"
+            title="Sign in to SmartCampus Portal"
+          >
+            <Lock className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Portal Login</span>
+          </button>
         </div>
       </div>
 
@@ -806,7 +786,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ initialOpenLogin = fal
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
             {/* 1. Student Roster */}
             <div
-              onClick={() => handleFeatureClick('/students', 'STUDENT', 'student@smartcampus.edu')}
+              onClick={() => handleFeatureClick('/students')}
               className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs hover:shadow-md hover:border-blue-400 transition-all cursor-pointer group"
             >
               <div className="w-10 h-10 mb-3 rounded-lg bg-blue-50 group-hover:bg-blue-600 text-blue-600 group-hover:text-white flex items-center justify-center transition-colors">
@@ -818,7 +798,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ initialOpenLogin = fal
 
             {/* 2. Courses & Curriculum */}
             <div
-              onClick={() => handleFeatureClick('/courses', 'STUDENT', 'student@smartcampus.edu')}
+              onClick={() => handleFeatureClick('/courses')}
               className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs hover:shadow-md hover:border-blue-400 transition-all cursor-pointer group"
             >
               <div className="w-10 h-10 mb-3 rounded-lg bg-indigo-50 group-hover:bg-indigo-600 text-indigo-600 group-hover:text-white flex items-center justify-center transition-colors">
@@ -830,7 +810,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ initialOpenLogin = fal
 
             {/* 3. Class Timetable */}
             <div
-              onClick={() => handleFeatureClick('/timetable', 'STUDENT', 'student@smartcampus.edu')}
+              onClick={() => handleFeatureClick('/timetable')}
               className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs hover:shadow-md hover:border-blue-400 transition-all cursor-pointer group"
             >
               <div className="w-10 h-10 mb-3 rounded-lg bg-emerald-50 group-hover:bg-emerald-600 text-emerald-600 group-hover:text-white flex items-center justify-center transition-colors">
@@ -842,7 +822,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ initialOpenLogin = fal
 
             {/* 4. Attendance Tracking */}
             <div
-              onClick={() => handleFeatureClick('/attendance', 'FACULTY', 'faculty@smartcampus.edu')}
+              onClick={() => handleFeatureClick('/attendance')}
               className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs hover:shadow-md hover:border-blue-400 transition-all cursor-pointer group"
             >
               <div className="w-10 h-10 mb-3 rounded-lg bg-teal-50 group-hover:bg-teal-600 text-teal-600 group-hover:text-white flex items-center justify-center transition-colors">
@@ -854,7 +834,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ initialOpenLogin = fal
 
             {/* 5. Examination Management */}
             <div
-              onClick={() => handleFeatureClick('/exams', 'EXAM_OFFICER', 'exams@smartcampus.edu')}
+              onClick={() => handleFeatureClick('/exams')}
               className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs hover:shadow-md hover:border-blue-400 transition-all cursor-pointer group"
             >
               <div className="w-10 h-10 mb-3 rounded-lg bg-rose-50 group-hover:bg-rose-600 text-rose-600 group-hover:text-white flex items-center justify-center transition-colors">
@@ -866,7 +846,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ initialOpenLogin = fal
 
             {/* 6. Fee Management */}
             <div
-              onClick={() => handleFeatureClick('/fees', 'ACCOUNTANT', 'accounts@smartcampus.edu')}
+              onClick={() => handleFeatureClick('/fees')}
               className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs hover:shadow-md hover:border-blue-400 transition-all cursor-pointer group"
             >
               <div className="w-10 h-10 mb-3 rounded-lg bg-amber-50 group-hover:bg-amber-600 text-amber-600 group-hover:text-white flex items-center justify-center transition-colors">
@@ -878,7 +858,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ initialOpenLogin = fal
 
             {/* 7. Digital Library */}
             <div
-              onClick={() => handleFeatureClick('/library', 'LIBRARIAN', 'library@smartcampus.edu')}
+              onClick={() => handleFeatureClick('/library')}
               className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs hover:shadow-md hover:border-blue-400 transition-all cursor-pointer group"
             >
               <div className="w-10 h-10 mb-3 rounded-lg bg-cyan-50 group-hover:bg-cyan-600 text-cyan-600 group-hover:text-white flex items-center justify-center transition-colors">
@@ -890,7 +870,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ initialOpenLogin = fal
 
             {/* 8. Hostel Management */}
             <div
-              onClick={() => handleFeatureClick('/hostel', 'COLLEGE_ADMIN', 'admin@smartcampus.edu')}
+              onClick={() => handleFeatureClick('/hostel')}
               className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs hover:shadow-md hover:border-blue-400 transition-all cursor-pointer group"
             >
               <div className="w-10 h-10 mb-3 rounded-lg bg-purple-50 group-hover:bg-purple-600 text-purple-600 group-hover:text-white flex items-center justify-center transition-colors">
@@ -902,7 +882,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ initialOpenLogin = fal
 
             {/* 9. Campus Transport */}
             <div
-              onClick={() => handleFeatureClick('/transport', 'COLLEGE_ADMIN', 'admin@smartcampus.edu')}
+              onClick={() => handleFeatureClick('/transport')}
               className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs hover:shadow-md hover:border-blue-400 transition-all cursor-pointer group"
             >
               <div className="w-10 h-10 mb-3 rounded-lg bg-emerald-50 group-hover:bg-emerald-600 text-emerald-600 group-hover:text-white flex items-center justify-center transition-colors">
@@ -914,7 +894,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ initialOpenLogin = fal
 
             {/* 10. Placement Cell */}
             <div
-              onClick={() => handleFeatureClick('/placement', 'STUDENT', 'student@smartcampus.edu')}
+              onClick={() => handleFeatureClick('/placement')}
               className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs hover:shadow-md hover:border-blue-400 transition-all cursor-pointer group"
             >
               <div className="w-10 h-10 mb-3 rounded-lg bg-indigo-50 group-hover:bg-indigo-600 text-indigo-600 group-hover:text-white flex items-center justify-center transition-colors">
@@ -926,7 +906,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ initialOpenLogin = fal
 
             {/* 11. Helpdesk & Grievances */}
             <div
-              onClick={() => handleFeatureClick('/helpdesk', 'STUDENT', 'student@smartcampus.edu')}
+              onClick={() => handleFeatureClick('/helpdesk')}
               className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs hover:shadow-md hover:border-blue-400 transition-all cursor-pointer group"
             >
               <div className="w-10 h-10 mb-3 rounded-lg bg-rose-50 group-hover:bg-rose-600 text-rose-600 group-hover:text-white flex items-center justify-center transition-colors">
@@ -938,7 +918,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ initialOpenLogin = fal
 
             {/* 12. Reports & Analytics */}
             <div
-              onClick={() => handleFeatureClick('/reports', 'COLLEGE_ADMIN', 'admin@smartcampus.edu')}
+              onClick={() => handleFeatureClick('/reports')}
               className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs hover:shadow-md hover:border-blue-400 transition-all cursor-pointer group"
             >
               <div className="w-10 h-10 mb-3 rounded-lg bg-blue-50 group-hover:bg-blue-600 text-blue-600 group-hover:text-white flex items-center justify-center transition-colors">
@@ -997,38 +977,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({ initialOpenLogin = fal
               >
                 <X className="w-5 h-5" />
               </button>
-            </div>
-
-            {/* Quick Demo Persona Badges */}
-            <div className="p-4 bg-slate-50 border-b border-slate-200">
-              <div className="text-[10px] font-bold uppercase text-slate-500 tracking-wider mb-2">
-                Quick Demo Persona Switcher (One-Click)
-              </div>
-              <div className="flex flex-wrap gap-1.5">
-                {[
-                  { role: 'STUDENT' as UserRole, label: 'Student', email: 'student@smartcampus.edu' },
-                  { role: 'FACULTY' as UserRole, label: 'Faculty', email: 'faculty@smartcampus.edu' },
-                  { role: 'COLLEGE_ADMIN' as UserRole, label: 'College Admin', email: 'admin@smartcampus.edu' },
-                  { role: 'SUPER_ADMIN' as UserRole, label: 'Super Admin', email: 'superadmin@smartcampus.edu' },
-                  { role: 'HOD' as UserRole, label: 'HOD', email: 'hod@smartcampus.edu' },
-                  { role: 'EXAM_OFFICER' as UserRole, label: 'Exams', email: 'exams@smartcampus.edu' },
-                  { role: 'ACCOUNTANT' as UserRole, label: 'Accounts', email: 'accounts@smartcampus.edu' },
-                  { role: 'LIBRARIAN' as UserRole, label: 'Library', email: 'library@smartcampus.edu' },
-                ].map((item) => (
-                  <button
-                    key={item.role}
-                    type="button"
-                    onClick={() => handleQuickRoleSelect(item.role, item.email)}
-                    className={`px-2.5 py-1 rounded text-[11px] font-semibold transition-all cursor-pointer ${
-                      selectedRole === item.role
-                        ? 'bg-blue-600 text-white shadow-xs'
-                        : 'bg-white border border-slate-300 text-slate-700 hover:border-blue-400 hover:text-blue-600'
-                    }`}
-                  >
-                    {item.label}
-                  </button>
-                ))}
-              </div>
             </div>
 
             {/* Form */}
@@ -1096,22 +1044,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({ initialOpenLogin = fal
                   </select>
                 </div>
               )}
-
-              {/* Role Selector */}
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">Sign-in Role Profile</label>
-                <select
-                  value={selectedRole}
-                  onChange={(e) => setSelectedRole(e.target.value as UserRole)}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                >
-                  {Object.keys(ROLE_LABELS).map((r) => (
-                    <option key={r} value={r}>
-                      {ROLE_LABELS[r as UserRole]}
-                    </option>
-                  ))}
-                </select>
-              </div>
 
               <div className="pt-2">
                 <button
@@ -1305,7 +1237,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ initialOpenLogin = fal
               <button
                 onClick={() => {
                   setShowTransportModal(false);
-                  handleFeatureClick('/transport', 'COLLEGE_ADMIN', 'admin@smartcampus.edu');
+                  handleFeatureClick('/transport');
                 }}
                 className="text-xs text-blue-600 font-bold hover:underline cursor-pointer"
               >

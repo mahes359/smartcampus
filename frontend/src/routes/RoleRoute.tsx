@@ -10,7 +10,7 @@ interface RoleRouteProps {
 export const RoleRoute: React.FC<RoleRouteProps> = ({ allowedRoles }) => {
   const { role } = useAuth();
 
-  if (!allowedRoles.includes(role)) {
+  if (!role || !allowedRoles.includes(role)) {
     return <Navigate to="/unauthorized" replace />;
   }
 

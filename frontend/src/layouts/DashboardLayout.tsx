@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { collegeService } from '../services/collegeService';
 import type { College } from '../types';
 import { ROLE_LABELS, type UserRole } from '../constants/roles';
+
 import { Avatar } from '../components/ui/Avatar';
 import { Badge } from '../components/ui/Badge';
 import { BrandLogo } from '../components/common/BrandLogo';
@@ -45,7 +46,7 @@ interface NavItem {
 }
 
 export const DashboardLayout: React.FC = () => {
-  const { user, role, activeCollegeId, switchCollege, switchRole, logout, isDarkMode, toggleDarkMode } = useAuth();
+  const { user, role, activeCollegeId, switchCollege, logout, isDarkMode, toggleDarkMode } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -189,7 +190,7 @@ export const DashboardLayout: React.FC = () => {
   // Filter items visible for the user's role
   const visibleNavItems = navItems.filter((item) => {
     if (!item.roles) return true;
-    return item.roles.includes(role);
+    return role ? item.roles.includes(role) : false;
   });
 
   const handleLogout = () => {
@@ -230,7 +231,7 @@ export const DashboardLayout: React.FC = () => {
             <Avatar name={user?.name || 'Admin'} size="sm" />
             <div className="flex-1 overflow-hidden">
               <p className="text-xs font-semibold text-slate-800 truncate">{user?.name}</p>
-              <p className="text-[10px] text-slate-500 truncate">{ROLE_LABELS[role]}</p>
+              <p className="text-[10px] text-slate-500 truncate">{role ? ROLE_LABELS[role] : ''}</p>
             </div>
           </div>
         </div>
@@ -301,21 +302,6 @@ export const DashboardLayout: React.FC = () => {
 
           {/* Right Action Icons & Persona Switcher */}
           <div className="flex items-center gap-3">
-            {/* Quick Role Persona Switcher (allows demoing any role) */}
-            <div className="hidden md:flex items-center gap-1.5 text-xs">
-              <span className="text-slate-500 font-medium">Role:</span>
-              <select
-                value={role}
-                onChange={(e) => switchRole(e.target.value as UserRole)}
-                className="text-xs border border-slate-200 rounded-lg bg-white text-slate-800 py-1 px-2 font-medium shadow-xs"
-              >
-                {Object.keys(ROLE_LABELS).map((r) => (
-                  <option key={r} value={r}>
-                    {ROLE_LABELS[r as UserRole]}
-                  </option>
-                ))}
-              </select>
-            </div>
 
             {/* Dark Mode Toggle */}
             <button
@@ -354,7 +340,7 @@ export const DashboardLayout: React.FC = () => {
                     <p className="text-xs font-semibold text-slate-900">{user?.name}</p>
                     <p className="text-[11px] text-slate-500 truncate">{user?.email}</p>
                     <Badge variant="primary" size="sm" className="mt-1.5">
-                      {ROLE_LABELS[role]}
+                      {role ? ROLE_LABELS[role] : ''}
                     </Badge>
                   </div>
                   <Link

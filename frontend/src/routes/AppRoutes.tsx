@@ -1,13 +1,16 @@
 import React from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import { AuthLayout } from '../layouts/AuthLayout';
 import { DashboardLayout } from '../layouts/DashboardLayout';
 import { ProtectedRoute } from './ProtectedRoute';
 import { RoleRoute } from './RoleRoute';
 
-// Pages
+// Public & Auth Pages
 import { LandingPage } from '../pages/public/LandingPage';
+import { Login } from '../pages/auth/Login';
 import { ForgotPassword } from '../pages/auth/ForgotPassword';
+
+// Protected ERP Pages
 import { DashboardIndex } from '../pages/dashboards/DashboardIndex';
 import { CollegeListPage } from '../pages/colleges/CollegeListPage';
 import { StudentListPage } from '../pages/students/StudentListPage';
@@ -36,58 +39,106 @@ import { UnauthorizedPage } from '../pages/common/UnauthorizedPage';
 export const AppRoutes: React.FC = () => {
   return (
     <Routes>
-      {/* Public Institutional Portal & Authentication Routes */}
+      {/* Public Institutional Portal */}
       <Route path="/" element={<LandingPage />} />
-      <Route path="/login" element={<LandingPage initialOpenLogin={true} />} />
+
+      {/* Public Dedicated Authentication Routes */}
       <Route element={<AuthLayout />}>
+        <Route path="/login" element={<Login />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
       </Route>
 
-      {/* Protected ERP Application Routes */}
+      {/* Protected ERP Application Shell */}
       <Route element={<ProtectedRoute />}>
         <Route element={<DashboardLayout />}>
-          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          {/* Primary Dashboard */}
           <Route path="/dashboard" element={<DashboardIndex />} />
 
-          {/* College Hierarchy (Super Admin & College Admin) */}
+          {/* Institutional Hierarchy */}
           <Route element={<RoleRoute allowedRoles={['SUPER_ADMIN', 'COLLEGE_ADMIN']} />}>
             <Route path="/colleges" element={<CollegeListPage />} />
           </Route>
 
-          {/* Student Roster & Academic Details */}
+          {/* Student Roster & Records */}
           <Route element={<RoleRoute allowedRoles={['SUPER_ADMIN', 'COLLEGE_ADMIN', 'HOD', 'FACULTY']} />}>
             <Route path="/students" element={<StudentListPage />} />
+            <Route path="/students/:id" element={<StudentDetailPage />} />
           </Route>
-          <Route path="/students/:id" element={<StudentDetailPage />} />
 
           {/* Faculty Management */}
           <Route element={<RoleRoute allowedRoles={['SUPER_ADMIN', 'COLLEGE_ADMIN', 'HOD']} />}>
             <Route path="/faculty" element={<FacultyListPage />} />
           </Route>
 
-          {/* Courses, Enrollment, Attendance, Exams */}
-          <Route path="/courses" element={<CourseListPage />} />
-          <Route path="/enrollment" element={<EnrollmentListPage />} />
-          <Route path="/attendance" element={<AttendanceListPage />} />
-          <Route path="/exams" element={<ExamListPage />} />
+          {/* Academic Courses & Curriculum */}
+          <Route element={<RoleRoute allowedRoles={['SUPER_ADMIN', 'COLLEGE_ADMIN', 'HOD', 'FACULTY', 'STUDENT']} />}>
+            <Route path="/courses" element={<CourseListPage />} />
+          </Route>
 
-          {/* Campus Operations */}
-          <Route path="/timetable" element={<TimetablePage />} />
-          <Route path="/fees" element={<FeeManagementPage />} />
-          <Route path="/library" element={<LibraryPage />} />
-          <Route path="/hostel" element={<HostelPage />} />
-          <Route path="/transport" element={<TransportPage />} />
-          <Route path="/leave" element={<LeavePage />} />
-          <Route path="/placement" element={<PlacementPage />} />
-          <Route path="/events" element={<EventPage />} />
-          <Route path="/notifications" element={<NotificationCenterPage />} />
-          <Route path="/documents" element={<DocumentVaultPage />} />
-          <Route path="/helpdesk" element={<HelpdeskPage />} />
+          {/* Course Enrollment & Registration */}
+          <Route element={<RoleRoute allowedRoles={['SUPER_ADMIN', 'COLLEGE_ADMIN', 'HOD', 'FACULTY', 'STUDENT']} />}>
+            <Route path="/enrollment" element={<EnrollmentListPage />} />
+          </Route>
 
-          {/* Reports & Analytics */}
+          {/* Attendance Tracking */}
+          <Route element={<RoleRoute allowedRoles={['SUPER_ADMIN', 'COLLEGE_ADMIN', 'HOD', 'FACULTY', 'STUDENT', 'PARENT']} />}>
+            <Route path="/attendance" element={<AttendanceListPage />} />
+          </Route>
+
+          {/* Examination & Grades */}
+          <Route element={<RoleRoute allowedRoles={['SUPER_ADMIN', 'COLLEGE_ADMIN', 'EXAM_OFFICER', 'HOD', 'FACULTY', 'STUDENT', 'PARENT']} />}>
+            <Route path="/exams" element={<ExamListPage />} />
+          </Route>
+
+          {/* Class Timetable */}
+          <Route element={<RoleRoute allowedRoles={['SUPER_ADMIN', 'COLLEGE_ADMIN', 'HOD', 'FACULTY', 'STUDENT']} />}>
+            <Route path="/timetable" element={<TimetablePage />} />
+          </Route>
+
+          {/* Fee Management & Invoicing */}
+          <Route element={<RoleRoute allowedRoles={['SUPER_ADMIN', 'COLLEGE_ADMIN', 'ACCOUNTANT', 'STUDENT', 'PARENT']} />}>
+            <Route path="/fees" element={<FeeManagementPage />} />
+          </Route>
+
+          {/* Library Management */}
+          <Route element={<RoleRoute allowedRoles={['SUPER_ADMIN', 'COLLEGE_ADMIN', 'LIBRARIAN', 'FACULTY', 'STUDENT']} />}>
+            <Route path="/library" element={<LibraryPage />} />
+          </Route>
+
+          {/* Hostel Management */}
+          <Route element={<RoleRoute allowedRoles={['SUPER_ADMIN', 'COLLEGE_ADMIN', 'HOSTEL_WARDEN', 'STUDENT']} />}>
+            <Route path="/hostel" element={<HostelPage />} />
+          </Route>
+
+          {/* Campus Transport */}
+          <Route element={<RoleRoute allowedRoles={['SUPER_ADMIN', 'COLLEGE_ADMIN', 'TRANSPORT_MANAGER', 'STUDENT']} />}>
+            <Route path="/transport" element={<TransportPage />} />
+          </Route>
+
+          {/* Leave & Absence Management */}
+          <Route element={<RoleRoute allowedRoles={['SUPER_ADMIN', 'COLLEGE_ADMIN', 'HOD', 'FACULTY', 'STUDENT']} />}>
+            <Route path="/leave" element={<LeavePage />} />
+          </Route>
+
+          {/* Career & Placements */}
+          <Route element={<RoleRoute allowedRoles={['SUPER_ADMIN', 'COLLEGE_ADMIN', 'PLACEMENT_OFFICER', 'STUDENT']} />}>
+            <Route path="/placement" element={<PlacementPage />} />
+          </Route>
+
+          {/* Institutional Document Vault */}
+          <Route element={<RoleRoute allowedRoles={['SUPER_ADMIN', 'COLLEGE_ADMIN', 'FACULTY', 'STUDENT']} />}>
+            <Route path="/documents" element={<DocumentVaultPage />} />
+          </Route>
+
+          {/* Institutional Reports & Analytics */}
           <Route element={<RoleRoute allowedRoles={['SUPER_ADMIN', 'COLLEGE_ADMIN', 'HOD', 'EXAM_OFFICER', 'ACCOUNTANT']} />}>
             <Route path="/reports" element={<ReportsAnalyticsPage />} />
           </Route>
+
+          {/* Campus-Wide Modules (All Authenticated ERP Users) */}
+          <Route path="/events" element={<EventPage />} />
+          <Route path="/notifications" element={<NotificationCenterPage />} />
+          <Route path="/helpdesk" element={<HelpdeskPage />} />
 
           {/* User Profile */}
           <Route path="/profile" element={<ProfilePage />} />

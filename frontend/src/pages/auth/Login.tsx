@@ -9,14 +9,12 @@ import type { College } from '../../types';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { Select } from '../../components/ui/Select';
-import { ROLE_LABELS, type UserRole } from '../../constants/roles';
 import { Lock, Mail, Eye, EyeOff, AlertCircle } from 'lucide-react';
 
 const loginSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
   password: z.string().min(4, 'Password must be at least 4 characters'),
   collegeId: z.string().optional(),
-  role: z.string().optional(),
   rememberMe: z.boolean().optional(),
 });
 
@@ -42,9 +40,8 @@ export const Login: React.FC = () => {
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: 'admin@smartcampus.edu',
-      password: 'password123',
-      role: 'COLLEGE_ADMIN',
+      email: '',
+      password: '',
       rememberMe: true,
     },
   });
@@ -69,8 +66,6 @@ export const Login: React.FC = () => {
       await login({
         email: data.email,
         password: data.password,
-        role: (data.role as UserRole) || 'COLLEGE_ADMIN',
-        collegeId: data.collegeId ? parseInt(data.collegeId, 10) : 1,
       });
       navigate('/dashboard');
     } catch (err: unknown) {
@@ -143,16 +138,6 @@ export const Login: React.FC = () => {
             {...register('collegeId')}
           />
         )}
-
-        {/* Persona / Role Selector */}
-        <Select
-          label="Sign-in Role Profile"
-          options={Object.keys(ROLE_LABELS).map((r) => ({
-            value: r,
-            label: ROLE_LABELS[r as UserRole],
-          }))}
-          {...register('role')}
-        />
 
         <div className="flex items-center justify-between text-xs">
           <label className="flex items-center gap-2 cursor-pointer text-slate-600 dark:text-slate-400">

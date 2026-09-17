@@ -115,6 +115,8 @@ services:
       - POSTGRES_PORT=5432
       - DB_USERNAME=${POSTGRES_USER:-collegeuser}
       - DB_PASSWORD=${POSTGRES_PASSWORD:-collegepass}
+      - JWT_SECRET=${JWT_SECRET:-SmartCampus-Super-Secret-Key-2026-Min-32-Chars-OK}
+      - JWT_EXPIRATION_MS=${JWT_EXPIRATION_MS:-86400000}
     depends_on:
       postgres:
         condition: service_healthy
